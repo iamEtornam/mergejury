@@ -3,8 +3,44 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>mergejury · a filter, not an accumulator</title>
-<meta name="description" content="mergejury runs several AI reviewers over your pull request, makes every finding fight for its life, and posts only what survives.">
+<title>mergejury · AI code review that posts only what survives</title>
+<meta name="description" content="mergejury runs several AI reviewers over your pull request, makes every finding fight for its life, and posts one review with only the comments that survive.">
+<!-- Canonical domain: replace mergejury.dev everywhere in this head (and in
+     robots.txt / sitemap.xml) if the site ships on a different domain. -->
+<link rel="canonical" href="https://mergejury.dev/">
+<meta name="theme-color" content="#161310">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="gambarino.woff2" as="font" type="font/woff2" crossorigin>
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="mergejury">
+<meta property="og:title" content="mergejury · AI code review that posts only what survives">
+<meta property="og:description" content="Several AI reviewers, one lens each. Every finding fights for its life: validation, challenge, verification, judgment. One review, a handful of defensible comments.">
+<meta property="og:url" content="https://mergejury.dev/">
+<meta property="og:image" content="https://mergejury.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="mergejury wordmark beside a tapering funnel. Twenty maybes, struck through: three defensible comments.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="mergejury · AI code review that posts only what survives">
+<meta name="twitter:description" content="Several AI reviewers, one lens each. Every finding fights for its life. One review, a handful of defensible comments.">
+<meta name="twitter:image" content="https://mergejury.dev/og.png">
+<meta name="twitter:image:alt" content="mergejury wordmark beside a tapering funnel. Twenty maybes, struck through: three defensible comments.">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "mergejury",
+  "url": "https://mergejury.dev/",
+  "image": "https://mergejury.dev/og.png",
+  "description": "A multi-reviewer code review harness: it fans a pull request out to several AI reviewers with different lenses, filters their findings through validation, an adversarial challenge, mechanical verification, and a judge, then posts one GitHub review with only the comments that survive.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "macOS, Linux, Windows",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
 <style>
 /* ---------- foundation ---------- */
 @font-face {
