@@ -40,7 +40,7 @@ async function save() {
   <h1>Prompts</h1>
   <p class="dim">
     Edits write to the configured prompts dir on disk so they stay in git; this is an editor, not a store.
-    Iterate against a past run with <span class="mono">revu runs replay &lt;id&gt;</span> or the replay button on a run.
+    Iterate against a past run with <span class="mono">mergejury runs replay &lt;id&gt;</span> or the replay button on a run.
   </p>
   <div style="display: flex; gap: 16px; align-items: flex-start">
     <div style="min-width: 180px">

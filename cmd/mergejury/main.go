@@ -1,4 +1,4 @@
-// Command revu is the CLI front end: reviews, adapter checks, run
+// Command mergejury is the CLI front end: reviews, adapter checks, run
 // inspection, replay, stats, and the local web console.
 package main
 
@@ -17,15 +17,15 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"revu/internal/adapter"
-	"revu/internal/anthropic"
-	"revu/internal/config"
-	"revu/internal/forge"
-	"revu/internal/httpapi"
-	"revu/internal/packet"
-	"revu/internal/run"
-	"revu/internal/store"
-	"revu/prompts"
+	"mergejury/internal/adapter"
+	"mergejury/internal/anthropic"
+	"mergejury/internal/config"
+	"mergejury/internal/forge"
+	"mergejury/internal/httpapi"
+	"mergejury/internal/packet"
+	"mergejury/internal/run"
+	"mergejury/internal/store"
+	"mergejury/prompts"
 )
 
 // Exit codes per section 12.
@@ -101,7 +101,7 @@ func (a *app) orchestrator(withForge bool) (*run.Orchestrator, error) {
 
 func newRoot() *cobra.Command {
 	root := &cobra.Command{
-		Use:           "revu",
+		Use:           "mergejury",
 		Short:         "multi-reviewer code review harness",
 		SilenceUsage:  true,
 		SilenceErrors: true,
@@ -110,7 +110,7 @@ func newRoot() *cobra.Command {
 	return root
 }
 
-// ---- revu review ----
+// ---- mergejury review ----
 
 var prURLRe = regexp.MustCompile(`github\.com/([^/]+/[^/]+)/pull/(\d+)`)
 
@@ -246,7 +246,7 @@ func printSummary(s *run.Summary) {
 	}
 }
 
-// ---- revu adapters check ----
+// ---- mergejury adapters check ----
 
 func newAdaptersCmd() *cobra.Command {
 	cmd := &cobra.Command{Use: "adapters", Short: "adapter tooling"}
@@ -293,7 +293,7 @@ func newAdaptersCmd() *cobra.Command {
 	return cmd
 }
 
-// ---- revu runs ----
+// ---- mergejury runs ----
 
 func newRunsCmd() *cobra.Command {
 	cmd := &cobra.Command{Use: "runs", Short: "inspect and replay stored runs"}
@@ -458,7 +458,7 @@ func indent(s, prefix string) string {
 	return strings.Join(lines, "\n")
 }
 
-// ---- revu stats ----
+// ---- mergejury stats ----
 
 func newStatsCmd() *cobra.Command {
 	return &cobra.Command{
@@ -489,7 +489,7 @@ func newStatsCmd() *cobra.Command {
 	}
 }
 
-// ---- revu serve ----
+// ---- mergejury serve ----
 
 func newServeCmd() *cobra.Command {
 	var addr string
@@ -530,7 +530,7 @@ func newServeCmd() *cobra.Command {
 				}()
 			}
 			srv := httpapi.New(o, a.st, a.ps)
-			fmt.Printf("revu console on http://%s\n", addr)
+			fmt.Printf("mergejury console on http://%s\n", addr)
 			return srv.ListenAndServe(cmd.Context(), addr)
 		},
 	}

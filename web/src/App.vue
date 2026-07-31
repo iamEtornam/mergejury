@@ -3,7 +3,7 @@
 
 <template>
   <header class="shell">
-    <router-link class="mark" to="/">revu</router-link>
+    <router-link class="mark" to="/">mergejury</router-link>
     <nav>
       <router-link to="/">runs</router-link>
       <router-link to="/live">live</router-link>

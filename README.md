@@ -1,4 +1,4 @@
-# revu
+# mergejury
 
 A multi-reviewer code review harness. It takes a pull request, runs several AI coding agents over it in parallel with different review lenses, filters their findings down to a small set of defensible ones, and posts that set as a single GitHub review with inline comments.
 
@@ -24,28 +24,28 @@ posted review ◀── computed verdict ◀── judge ◀── challenger + 
 ## Install and run
 
 ```sh
-go build -o bin/revu ./cmd/revu
+go build -o bin/mergejury ./cmd/mergejury
 ```
 
 One static binary; the web console is embedded. Requirements: `git` on PATH, `ANTHROPIC_API_KEY` for `modelapi`/challenger/judge, `GITHUB_TOKEN` for PR runs (a dedicated machine-user or App token — GitHub 422s self-approval, and the reviewing identity should never be the authoring identity), and whichever agent CLIs (`claude`, `cursor-agent`, `agy`) you configure.
 
 ```sh
-revu adapters check              # probe install/auth/flags per adapter, with remediation
-revu review --local --base main  # review the working tree; no PR, no posting (fast dev loop)
-revu review 123 --dry-run        # render the review for PR 123 without posting
-revu review https://github.com/o/r/pull/123
-revu runs list                   # stored runs
-revu runs show 7 --raw           # everything, incl. dropped findings and raw output
-revu runs replay 7               # re-run cluster/challenge/judge on stored findings, no adapters
-revu stats                       # cost per published comment per adapter — the survival metric
-revu serve                       # web console on 127.0.0.1:7777
+mergejury adapters check              # probe install/auth/flags per adapter, with remediation
+mergejury review --local --base main  # review the working tree; no PR, no posting (fast dev loop)
+mergejury review 123 --dry-run        # render the review for PR 123 without posting
+mergejury review https://github.com/o/r/pull/123
+mergejury runs list                   # stored runs
+mergejury runs show 7 --raw           # everything, incl. dropped findings and raw output
+mergejury runs replay 7               # re-run cluster/challenge/judge on stored findings, no adapters
+mergejury stats                       # cost per published comment per adapter — the survival metric
+mergejury serve                       # web console on 127.0.0.1:7777
 ```
 
 Exit codes: `0` completed, `1` could not start, `2` completed with adapter failures, `3` config or auth error.
 
 ## Configuration
 
-`revu.yaml` in the repo root, then `~/.config/revu/revu.yaml`, then env (`REVU_DB`, `REVU_PROMPTS_DIR`, `REVU_DRY_RUN`). See [revu.example.yaml](revu.example.yaml) for the full schema. Every run snapshots its resolved config so quality changes are attributable to a prompt edit vs a config change.
+`mergejury.yaml` in the repo root, then `~/.config/mergejury/mergejury.yaml`, then env (`MERGEJURY_DB`, `MERGEJURY_PROMPTS_DIR`, `MERGEJURY_DRY_RUN`). See [mergejury.example.yaml](mergejury.example.yaml) for the full schema. Every run snapshots its resolved config so quality changes are attributable to a prompt edit vs a config change.
 
 Prompts live in [prompts/](prompts) and are embedded; set `prompts_dir` to make them editable (the web console's prompt editor writes there so edits stay in git).
 
@@ -69,4 +69,4 @@ The golden diff fixtures in [testdata/diffs](testdata/diffs) pin the commentable
 
 ## Before enabling verdicts on a real repo
 
-Ship `verdict.enabled: false` (or run `--no-verdict`) until you have verified against a scratch repo with a dedicated bot identity: the self-approval 422, the Actions "allow GitHub Actions to create and approve pull requests" setting if posting from Actions, supersession of a stale `REQUEST_CHANGES` (it is sticky until dismissed or superseded by an approval from the same identity), and dismissal messages naming the new head SHA. `revu adapters check` and the poster tests cover the logic; the API is the final authority.
+Ship `verdict.enabled: false` (or run `--no-verdict`) until you have verified against a scratch repo with a dedicated bot identity: the self-approval 422, the Actions "allow GitHub Actions to create and approve pull requests" setting if posting from Actions, supersession of a stale `REQUEST_CHANGES` (it is sticky until dismissed or superseded by an approval from the same identity), and dismissal messages naming the new head SHA. `mergejury adapters check` and the poster tests cover the logic; the API is the final authority.

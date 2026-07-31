@@ -5,7 +5,7 @@ package cluster
 import (
 	"sort"
 
-	"revu/internal/finding"
+	"mergejury/internal/finding"
 )
 
 // Item is a kept finding with its store ID, ready to cluster.

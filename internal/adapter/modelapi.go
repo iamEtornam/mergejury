@@ -5,11 +5,11 @@ import (
 	"errors"
 	"time"
 
-	"revu/internal/anthropic"
-	"revu/internal/config"
-	"revu/internal/finding"
-	"revu/internal/packet"
-	"revu/prompts"
+	"mergejury/internal/anthropic"
+	"mergejury/internal/config"
+	"mergejury/internal/finding"
+	"mergejury/internal/packet"
+	"mergejury/prompts"
 )
 
 // AnthropicClient aliases the shared client so callers construct one and

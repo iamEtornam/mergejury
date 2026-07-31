@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"revu/internal/finding"
-	"revu/internal/packet"
+	"mergejury/internal/finding"
+	"mergejury/internal/packet"
 )
 
 // Drop reasons, recorded on every dropped finding.

@@ -12,12 +12,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"revu/internal/anthropic"
-	"revu/internal/cluster"
-	"revu/internal/finding"
-	"revu/internal/packet"
-	"revu/internal/verify"
-	"revu/prompts"
+	"mergejury/internal/anthropic"
+	"mergejury/internal/cluster"
+	"mergejury/internal/finding"
+	"mergejury/internal/packet"
+	"mergejury/internal/verify"
+	"mergejury/prompts"
 )
 
 // CodeContext renders the code around an anchor with real line numbers.

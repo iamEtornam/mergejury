@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"revu/internal/config"
-	"revu/internal/packet"
-	"revu/prompts"
+	"mergejury/internal/config"
+	"mergejury/internal/packet"
+	"mergejury/prompts"
 )
 
 const helpAll = `Usage:

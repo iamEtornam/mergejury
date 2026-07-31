@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"revu/internal/finding"
-	"revu/internal/packet"
+	"mergejury/internal/finding"
+	"mergejury/internal/packet"
 )
 
 func testPacket() *packet.Packet {

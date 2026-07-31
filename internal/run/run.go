@@ -14,17 +14,17 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"revu/internal/adapter"
-	"revu/internal/adjudicate"
-	"revu/internal/cluster"
-	"revu/internal/config"
-	"revu/internal/finding"
-	"revu/internal/forge"
-	"revu/internal/packet"
-	"revu/internal/store"
-	"revu/internal/validate"
-	"revu/internal/verify"
-	"revu/prompts"
+	"mergejury/internal/adapter"
+	"mergejury/internal/adjudicate"
+	"mergejury/internal/cluster"
+	"mergejury/internal/config"
+	"mergejury/internal/finding"
+	"mergejury/internal/forge"
+	"mergejury/internal/packet"
+	"mergejury/internal/store"
+	"mergejury/internal/validate"
+	"mergejury/internal/verify"
+	"mergejury/prompts"
 )
 
 type Options struct {
@@ -288,7 +288,7 @@ func (o *Orchestrator) execute(ctx context.Context, p *packet.Packet, opts Optio
 		sum.Status = "gated"
 		sum.EventReason = reason
 		if !opts.DryRun && o.Forge != nil {
-			body := "**revu: skipped.** " + reason
+			body := "**mergejury: skipped.** " + reason
 			if _, err := o.Forge.CreateReview(ctx, p.Repo, p.PRNumber, forge.ReviewRequest{
 				CommitID: p.HeadSHA, Body: body, Event: forge.EventComment,
 			}); err != nil {

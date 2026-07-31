@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>revu · a filter, not an accumulator</title>
-<meta name="description" content="revu runs several AI reviewers over your pull request, makes every finding fight for its life, and posts only what survives.">
+<title>mergejury · a filter, not an accumulator</title>
+<meta name="description" content="mergejury runs several AI reviewers over your pull request, makes every finding fight for its life, and posts only what survives.">
 <style>
 /* ---------- foundation ---------- */
 @font-face {
@@ -333,16 +333,16 @@ footer .links a:hover { color: var(--ink); }
   display: block;
   text-align: center;
   font-family: var(--display);
-  font-size: clamp(120px, 26vw, 340px);
+  font-size: clamp(52px, 14.5vw, 210px);
   line-height: 1;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   color: var(--amber);
   opacity: 0.9;
   margin-top: 32px;
-  /* "revu" has no descenders. Measured against Gambarino's real metrics
-     (baseline sits at 0.885em of the 1em line box, ink ends ~0.9em):
-     cropping 0.095em puts the baseline flush on the page edge with every
-     glyph whole. */
+  /* Gambarino's baseline sits at 0.885em of the 1em line box (measured).
+     Cropping 0.095em puts the baseline flush on the page edge; the j/g/y
+     descenders bleed off the bottom deliberately while every other glyph
+     stays whole. */
   margin-bottom: -0.095em;
   user-select: none;
 }
@@ -368,7 +368,7 @@ footer .links a:hover { color: var(--ink); }
 <body>
 
 <nav>
-  <a class="mark" href="#">revu</a>
+  <a class="mark" href="#">mergejury</a>
   <div class="links">
     <a href="#gauntlet">the gauntlet</a>
     <a href="#verdict">the verdict</a>
@@ -380,13 +380,13 @@ footer .links a:hover { color: var(--ink); }
     <div>
       <h1>Most AI review comments<br><span class="kill-word">should&nbsp;survive</span> shouldn&rsquo;t.</h1>
       <p class="sub">
-        revu fans your pull request out to several AI reviewers, each with one lens:
+        mergejury fans your pull request out to several AI reviewers, each with one lens:
         security, correctness, contracts, tests, performance. Then it makes every finding
         fight for its life. <strong>What survives gets posted: one review, a handful of
         comments, each one defensible.</strong>
       </p>
       <div class="try">
-        <code id="try-cmd"><span class="p">$</span> revu review 4127 --dry-run</code>
+        <code id="try-cmd"><span class="p">$</span> mergejury review 4127 --dry-run</code>
         <button class="copy-btn" id="copy" type="button">copy</button>
       </div>
     </div>
@@ -569,11 +569,11 @@ footer .links a:hover { color: var(--ink); }
   <section class="operate wrap">
     <h2 class="statement">Built to be operated,<br>not believed.</h2>
     <div class="cmds">
-      <div class="cmd"><code><span class="p">$</span> revu review --local</code><span class="what">review the working tree before you push. No PR, no posting</span></div>
-      <div class="cmd"><code><span class="p">$</span> revu adapters check</code><span class="what">which reviewer is broken, and the exact fix</span></div>
-      <div class="cmd"><code><span class="p">$</span> revu runs replay 7</code><span class="what">re-judge a stored run for cents; tune prompts against real findings</span></div>
-      <div class="cmd"><code><span class="p">$</span> revu stats</code><span class="what">cost per published comment, per reviewer: the number that decides who stays</span></div>
-      <div class="cmd"><code><span class="p">$</span> revu serve</code><span class="what">the operator console: every drop, every verdict, traceable in under a minute</span></div>
+      <div class="cmd"><code><span class="p">$</span> mergejury review --local</code><span class="what">review the working tree before you push. No PR, no posting</span></div>
+      <div class="cmd"><code><span class="p">$</span> mergejury adapters check</code><span class="what">which reviewer is broken, and the exact fix</span></div>
+      <div class="cmd"><code><span class="p">$</span> mergejury runs replay 7</code><span class="what">re-judge a stored run for cents; tune prompts against real findings</span></div>
+      <div class="cmd"><code><span class="p">$</span> mergejury stats</code><span class="what">cost per published comment, per reviewer: the number that decides who stays</span></div>
+      <div class="cmd"><code><span class="p">$</span> mergejury serve</code><span class="what">the operator console: every drop, every verdict, traceable in under a minute</span></div>
     </div>
   </section>
 </main>
@@ -587,14 +587,14 @@ footer .links a:hover { color: var(--ink); }
       <a href="#verdict">verdict</a>
     </div>
   </div>
-  <span class="wordmark" aria-hidden="true">revu</span>
+  <span class="wordmark" aria-hidden="true">mergejury</span>
 </footer>
 
 <script>
 document.getElementById('copy').addEventListener('click', async (e) => {
   const btn = e.currentTarget;
   try {
-    await navigator.clipboard.writeText('revu review 4127 --dry-run');
+    await navigator.clipboard.writeText('mergejury review 4127 --dry-run');
     btn.textContent = 'copied';
   } catch {
     // Clipboard unavailable: select the command so a manual copy works.

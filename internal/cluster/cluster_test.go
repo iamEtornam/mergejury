@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"revu/internal/finding"
+	"mergejury/internal/finding"
 )
 
 func item(id int64, adapter, path string, line int, cat finding.Category, sev finding.Severity) Item {

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"os"
 
-	"revu/internal/cluster"
-	"revu/internal/finding"
-	"revu/internal/forge"
-	"revu/internal/packet"
-	"revu/internal/validate"
+	"mergejury/internal/cluster"
+	"mergejury/internal/finding"
+	"mergejury/internal/forge"
+	"mergejury/internal/packet"
+	"mergejury/internal/validate"
 )
 
 // Replay re-runs clustering, challenging, and judging against findings

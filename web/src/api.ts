@@ -1,4 +1,4 @@
-// Typed client for the revu HTTP API.
+// Typed client for the mergejury HTTP API.
 
 export interface Run {
   id: number

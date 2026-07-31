@@ -15,10 +15,10 @@ import (
 	"strings"
 	"time"
 
-	"revu/internal/run"
-	"revu/internal/store"
-	"revu/prompts"
-	"revu/web"
+	"mergejury/internal/run"
+	"mergejury/internal/store"
+	"mergejury/prompts"
+	"mergejury/web"
 )
 
 type Server struct {

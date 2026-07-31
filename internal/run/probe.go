@@ -3,7 +3,7 @@ package run
 import (
 	"context"
 
-	"revu/internal/adapter"
+	"mergejury/internal/adapter"
 )
 
 // ProbeAdapters checks every configured adapter: installed, authenticated,

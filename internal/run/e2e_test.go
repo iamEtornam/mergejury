@@ -13,12 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"revu/internal/adapter"
-	"revu/internal/anthropic"
-	"revu/internal/config"
-	"revu/internal/forge"
-	"revu/internal/store"
-	"revu/prompts"
+	"mergejury/internal/adapter"
+	"mergejury/internal/anthropic"
+	"mergejury/internal/config"
+	"mergejury/internal/forge"
+	"mergejury/internal/store"
+	"mergejury/prompts"
 )
 
 // ---- fake forge ----
@@ -31,7 +31,7 @@ type fakeForge struct {
 }
 
 func (f *fakeForge) FetchPR(context.Context, string, int) (*forge.PR, error) { return f.pr, nil }
-func (f *fakeForge) Viewer(context.Context) (string, error)                  { return "revu-bot", nil }
+func (f *fakeForge) Viewer(context.Context) (string, error)                  { return "mergejury-bot", nil }
 func (f *fakeForge) CreateReview(_ context.Context, _ string, _ int, req forge.ReviewRequest) (int64, error) {
 	f.created = append(f.created, req)
 	f.nextID++
@@ -150,7 +150,7 @@ func e2eOrchestrator(t *testing.T, stub *modelStub, ff *fakeForge) *Orchestrator
 	t.Helper()
 	srv := httptest.NewServer(stub.handler())
 	t.Cleanup(srv.Close)
-	st, err := store.Open(filepath.Join(t.TempDir(), "revu.db"))
+	st, err := store.Open(filepath.Join(t.TempDir(), "mergejury.db"))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"revu/internal/finding"
+	"mergejury/internal/finding"
 )
 
 // fakeForge records calls and scripts failures.

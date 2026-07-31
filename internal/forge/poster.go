@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"revu/internal/finding"
+	"mergejury/internal/finding"
 )
 
 // PublishedItem is one judge-published cluster, ready to render.
@@ -114,11 +114,11 @@ func RenderBody(in ReviewInput, inline, overflow []PublishedItem) string {
 	var b strings.Builder
 	switch in.Event {
 	case EventApprove:
-		fmt.Fprintf(&b, "**revu: approve.** %s\n", in.EventReason)
+		fmt.Fprintf(&b, "**mergejury: approve.** %s\n", in.EventReason)
 	case EventRequestChanges:
-		fmt.Fprintf(&b, "**revu: changes requested.** %s\n", in.EventReason)
+		fmt.Fprintf(&b, "**mergejury: changes requested.** %s\n", in.EventReason)
 	default:
-		fmt.Fprintf(&b, "**revu: comments.** %s\n", in.EventReason)
+		fmt.Fprintf(&b, "**mergejury: comments.** %s\n", in.EventReason)
 	}
 	fmt.Fprintf(&b, "\n%d finding(s) published, %d inline.\n", len(inline)+len(overflow), len(inline))
 
@@ -225,7 +225,7 @@ func Post(ctx context.Context, f Forge, in ReviewInput) (PostOutcome, error) {
 	// explicitly or the PR stays blocked.
 	if in.PriorReviewID != 0 && in.PriorEvent == EventRequestChanges &&
 		in.Event != EventRequestChanges && in.Event != EventApprove {
-		msg := fmt.Sprintf("Superseded by revu run against head %s.", in.HeadSHA)
+		msg := fmt.Sprintf("Superseded by mergejury run against head %s.", in.HeadSHA)
 		if err := f.DismissReview(ctx, in.Repo, in.PRNumber, in.PriorReviewID, msg); err != nil {
 			return out, fmt.Errorf("review posted but stale REQUEST_CHANGES not dismissed: %w", err)
 		}

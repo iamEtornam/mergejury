@@ -78,7 +78,7 @@ func (s *Set) List() []string {
 // when no override dir is configured: the embedded copies are read-only.
 func (s *Set) Save(name, content string) error {
 	if s.overrideDir == "" {
-		return fmt.Errorf("no prompts dir configured; set prompts_dir in revu.yaml to make prompts editable")
+		return fmt.Errorf("no prompts dir configured; set prompts_dir in mergejury.yaml to make prompts editable")
 	}
 	if strings.ContainsAny(name, "/\\.") {
 		return fmt.Errorf("invalid prompt name %q", name)

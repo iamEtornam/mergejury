@@ -10,10 +10,10 @@ import (
 	"sync"
 	"time"
 
-	"revu/internal/config"
-	"revu/internal/finding"
-	"revu/internal/packet"
-	"revu/prompts"
+	"mergejury/internal/config"
+	"mergejury/internal/finding"
+	"mergejury/internal/packet"
+	"mergejury/prompts"
 )
 
 // findingSchemaJSON is the wrapper schema passed to CLIs that support

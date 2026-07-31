@@ -41,7 +41,7 @@ type Worktrees struct {
 func NewWorktrees(ctx context.Context, repoDir string) (*Worktrees, error) {
 	// Recover from crashed runs before adding new trees.
 	_, _ = Git(ctx, repoDir, "worktree", "prune")
-	base, err := os.MkdirTemp("", "revu-worktrees-*")
+	base, err := os.MkdirTemp("", "mergejury-worktrees-*")
 	if err != nil {
 		return nil, err
 	}

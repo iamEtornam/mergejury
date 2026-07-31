@@ -1,4 +1,4 @@
-# revu configuration. Copy to revu.yaml in your repo root or ~/.config/revu/.
+# mergejury configuration. Copy to mergejury.yaml in your repo root or ~/.config/mergejury/.
 
 adapters:
   - id: claude-code
@@ -57,5 +57,5 @@ verdict:
   approve_forks: false         # leave false: fork PRs are the injection delivery vehicle
 # Not configurable by design: a degraded run never approves.
 
-# db_path: ~/.local/share/revu/revu.db   # override with REVU_DB
+# db_path: ~/.local/share/mergejury/mergejury.db   # override with MERGEJURY_DB
 # prompts_dir: prompts                   # make prompt templates editable on disk

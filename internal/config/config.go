@@ -1,5 +1,5 @@
-// Package config loads revu.yaml, resolved from repo root then
-// ~/.config/revu/, with environment overrides.
+// Package config loads mergejury.yaml, resolved from repo root then
+// ~/.config/mergejury/, with environment overrides.
 package config
 
 import (
@@ -11,7 +11,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"revu/internal/finding"
+	"mergejury/internal/finding"
 )
 
 type Adapter struct {
@@ -104,17 +104,17 @@ func Default() Config {
 	}
 }
 
-// Load resolves the config: defaults, then ~/.config/revu/revu.yaml, then
-// <startDir>/revu.yaml, then environment overrides.
+// Load resolves the config: defaults, then ~/.config/mergejury/mergejury.yaml, then
+// <startDir>/mergejury.yaml, then environment overrides.
 func Load(startDir string) (Config, error) {
 	cfg := Default()
 	if home, err := os.UserHomeDir(); err == nil {
-		if err := mergeFile(&cfg, filepath.Join(home, ".config", "revu", "revu.yaml")); err != nil {
+		if err := mergeFile(&cfg, filepath.Join(home, ".config", "mergejury", "mergejury.yaml")); err != nil {
 			return cfg, err
 		}
 	}
 	if startDir != "" {
-		if err := mergeFile(&cfg, filepath.Join(startDir, "revu.yaml")); err != nil {
+		if err := mergeFile(&cfg, filepath.Join(startDir, "mergejury.yaml")); err != nil {
 			return cfg, err
 		}
 	}
@@ -145,13 +145,13 @@ func mergeFile(cfg *Config, path string) error {
 }
 
 func applyEnv(cfg *Config) {
-	if v := os.Getenv("REVU_DB"); v != "" {
+	if v := os.Getenv("MERGEJURY_DB"); v != "" {
 		cfg.DBPath = v
 	}
-	if v := os.Getenv("REVU_PROMPTS_DIR"); v != "" {
+	if v := os.Getenv("MERGEJURY_PROMPTS_DIR"); v != "" {
 		cfg.PromptsDir = v
 	}
-	if v := os.Getenv("REVU_DRY_RUN"); v == "1" || v == "true" {
+	if v := os.Getenv("MERGEJURY_DRY_RUN"); v == "1" || v == "true" {
 		cfg.Posting.DryRun = true
 	}
 }
@@ -159,11 +159,11 @@ func applyEnv(cfg *Config) {
 func defaultDBPath() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return "revu.db"
+		return "mergejury.db"
 	}
-	dir := filepath.Join(home, ".local", "share", "revu")
+	dir := filepath.Join(home, ".local", "share", "mergejury")
 	_ = os.MkdirAll(dir, 0o755)
-	return filepath.Join(dir, "revu.db")
+	return filepath.Join(dir, "mergejury.db")
 }
 
 // Snapshot serializes the resolved config for runs.config_snapshot, so a

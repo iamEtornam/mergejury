@@ -57,5 +57,5 @@ function duration(r: Run): string {
       </tr>
     </tbody>
   </table>
-  <p v-else class="empty">No runs yet. Start one with <span class="mono">revu review &lt;pr&gt;</span> or <span class="mono">revu review --local</span>.</p>
+  <p v-else class="empty">No runs yet. Start one with <span class="mono">mergejury review &lt;pr&gt;</span> or <span class="mono">mergejury review --local</span>.</p>
 </template>

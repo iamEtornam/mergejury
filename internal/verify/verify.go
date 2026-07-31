@@ -12,8 +12,8 @@ import (
 	"regexp"
 	"strings"
 
-	"revu/internal/cluster"
-	"revu/internal/finding"
+	"mergejury/internal/cluster"
+	"mergejury/internal/finding"
 )
 
 const (

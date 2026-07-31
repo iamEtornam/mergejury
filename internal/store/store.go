@@ -13,7 +13,7 @@ import (
 
 	_ "modernc.org/sqlite"
 
-	"revu/internal/finding"
+	"mergejury/internal/finding"
 )
 
 //go:embed all:migrations

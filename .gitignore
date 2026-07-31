@@ -3,4 +3,4 @@ web/node_modules/
 *.db
 *.db-shm
 *.db-wal
-revu.yaml
+mergejury.yaml

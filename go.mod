@@ -1,4 +1,4 @@
-module revu
+module mergejury
 
 go 1.25.5
 
