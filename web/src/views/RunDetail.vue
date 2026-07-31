@@ -91,8 +91,8 @@ function clusterAnchor(c: { path: string; line: number }): string {
   <template v-else-if="detail">
     <h1>
       Run {{ detail.run.id }}
-      <span class="dim" v-if="detail.run.repo"> — {{ detail.run.repo }}#{{ detail.run.pr_number }}</span>
-      <span class="dim" v-else> — local</span>
+      <span class="dim" v-if="detail.run.repo"> · {{ detail.run.repo }}#{{ detail.run.pr_number }}</span>
+      <span class="dim" v-else> · local</span>
     </h1>
     <div class="kv">
       <span><span class="k">head</span><span class="v">{{ shortSha(detail.run.head_sha) }}</span></span>
