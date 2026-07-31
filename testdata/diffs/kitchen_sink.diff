@@ -1,0 +1,93 @@
+diff --git a/bin.dat b/bin.dat
+index 0f49c4a..167ebbc 100644
+Binary files a/bin.dat and b/bin.dat differ
+diff --git a/crlf.txt b/crlf.txt
+index df0aae8..4f76134 100644
+--- a/crlf.txt
++++ b/crlf.txt
+@@ -1,3 +1,3 @@
+ c1
+-c2
++c2 changed
+ c3
+diff --git a/delete_me.txt b/delete_me.txt
+deleted file mode 100644
+index de98044..0000000
+--- a/delete_me.txt
++++ /dev/null
+@@ -1,3 +0,0 @@
+-a
+-b
+-c
+diff --git a/eof.txt b/eof.txt
+index 7e1cd11..5980643 100644
+--- a/eof.txt
++++ b/eof.txt
+@@ -1,3 +1,4 @@
+ e1
+ e2
+ e3
++e4 added
+diff --git a/multi.txt b/multi.txt
+index 4083766..80d456c 100644
+--- a/multi.txt
++++ b/multi.txt
+@@ -1,10 +1,11 @@
+ line1
+-line2
++line2 changed
+ line3
+ line4
+ line5
+ line6
+ line7
+-line8
++line8 changed
++new line 8.5
+ line9
+ line10
+diff --git a/newfile.txt b/newfile.txt
+new file mode 100644
+index 0000000..fb28d7d
+--- /dev/null
++++ b/newfile.txt
+@@ -0,0 +1,3 @@
++brand
++new
++file
+diff --git a/nonewline.txt b/nonewline.txt
+index 5fe505c..b75eac8 100644
+--- a/nonewline.txt
++++ b/nonewline.txt
+@@ -1,2 +1,2 @@
+ n1
+-n2
+\ No newline at end of file
++n2 changed
+\ No newline at end of file
+diff --git a/rename_src.txt b/renamed.txt
+similarity index 100%
+rename from rename_src.txt
+rename to renamed.txt
+diff --git a/rename_edit_src.txt b/renamed_edited.txt
+similarity index 45%
+rename from rename_edit_src.txt
+rename to renamed_edited.txt
+index c96fe16..31a0046 100644
+--- a/rename_edit_src.txt
++++ b/renamed_edited.txt
+@@ -1,4 +1,4 @@
+ r1
+-r2
++r2 changed
+ r3
+ r4
+diff --git a/top.txt b/top.txt
+index ff6e6b1..d813fe2 100644
+--- a/top.txt
++++ b/top.txt
+@@ -1,3 +1,3 @@
+-first
++FIRST
+ second
+ third

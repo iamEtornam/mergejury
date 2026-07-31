@@ -1,0 +1,61 @@
+# revu configuration. Copy to revu.yaml in your repo root or ~/.config/revu/.
+
+adapters:
+  - id: claude-code
+    kind: claude-code          # claude-code | cursor | antigravity | modelapi
+    lens: security             # security | correctness | api-contract | test-gap | perf
+    model: claude-sonnet-5
+    timeout: 5m
+    max_cost_usd: 1.00
+  - id: cursor
+    kind: cursor
+    lens: correctness
+    timeout: 5m
+  - id: antigravity
+    kind: antigravity
+    lens: api-contract
+    timeout: 5m
+  - id: api-baseline           # direct API, no repo access: cheap precision baseline
+    kind: modelapi
+    lens: test-gap
+    model: claude-sonnet-5
+
+gates:                         # a PR failing a gate gets a short explanatory review, not silence
+  max_changed_lines: 1500
+  max_changed_files: 60
+  skip_paths:
+    - "**/*.lock"
+    - "**/go.sum"
+    - "**/generated/**"
+    - "**/*.pb.go"
+    - "**/vendor/**"
+
+verification:                  # run in the worktree; {{.Paths}} expands to the cluster's file
+  commands:
+    lint: "golangci-lint run --out-format json {{.Paths}}"
+    typecheck: "go build ./..."
+
+adjudication:
+  cluster_window_lines: 3
+  challenger:
+    enabled: true
+    min_severity: major        # challenging nits is not worth the tokens
+    model: claude-opus-5
+  judge:
+    model: claude-opus-5
+
+posting:
+  max_inline_comments: 10
+  min_severity: minor          # nit is dropped by default
+  dry_run: false
+  footer_attribution: true     # "flagged by claude-code, cursor · disputed by …"
+
+verdict:
+  enabled: true
+  request_changes_at: blocker  # any published finding at or above this severity
+  approve_on_clean: true       # complete run, zero published findings, zero needs_human
+  approve_forks: false         # leave false: fork PRs are the injection delivery vehicle
+# Not configurable by design: a degraded run never approves.
+
+# db_path: ~/.local/share/revu/revu.db   # override with REVU_DB
+# prompts_dir: prompts                   # make prompt templates editable on disk

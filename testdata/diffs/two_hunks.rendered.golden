@@ -1,0 +1,23 @@
+=== big.txt ===
+You may only comment on these line numbers: 2-8, 27-33
+
+       2 |   row2
+       3 |   row3
+       4 |   row4
+       5 | + row5 changed
+       6 |   row6
+       7 |   row7
+       8 |   row8
+  Removed in this PR (old line numbers, do not anchor to these):
+  - 5: row5
+     ... |
+      27 |   row27
+      28 |   row28
+      29 |   row29
+      30 | + row30 changed
+      31 |   row31
+      32 |   row32
+      33 |   row33
+  Removed in this PR (old line numbers, do not anchor to these):
+  - 30: row30
+

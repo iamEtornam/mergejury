@@ -1,0 +1,22 @@
+diff --git a/big.txt b/big.txt
+index dcad69c..d9168e0 100644
+--- a/big.txt
++++ b/big.txt
+@@ -2,7 +2,7 @@ row1
+ row2
+ row3
+ row4
+-row5
++row5 changed
+ row6
+ row7
+ row8
+@@ -27,7 +27,7 @@ row26
+ row27
+ row28
+ row29
+-row30
++row30 changed
+ row31
+ row32
+ row33
