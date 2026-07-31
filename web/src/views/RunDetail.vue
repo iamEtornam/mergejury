@@ -33,19 +33,19 @@ const findingsByAdapterRun = computed(() => {
 
 function clusterOfFinding(findingId: number): number | null {
   for (const c of detail.value?.clusters ?? []) {
-    if (c.finding_ids.includes(findingId)) return c.id
+    if ((c.finding_ids ?? []).includes(findingId)) return c.id
   }
   return null
 }
 
 function verdictOfCluster(clusterId: number) {
-  return detail.value?.verdicts.find((v) => v.cluster_id === clusterId) ?? null
+  return (detail.value?.verdicts ?? []).find((v) => v.cluster_id === clusterId) ?? null
 }
 function challengeOfCluster(clusterId: number) {
-  return detail.value?.challenges.find((c) => c.cluster_id === clusterId) ?? null
+  return (detail.value?.challenges ?? []).find((c) => c.cluster_id === clusterId) ?? null
 }
 function verificationsOfCluster(clusterId: number) {
-  return detail.value?.verifications.filter((v) => v.cluster_id === clusterId) ?? []
+  return (detail.value?.verifications ?? []).filter((v) => v.cluster_id === clusterId)
 }
 
 function select(clusterId: number | null) {

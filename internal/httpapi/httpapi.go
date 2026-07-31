@@ -179,6 +179,25 @@ func (s *Server) runDetail(w http.ResponseWriter, r *http.Request) {
 	d.Verifications, _ = s.st.VerificationsForRun(id)
 	d.Challenges, _ = s.st.ChallengesForRun(id)
 	d.Verdicts, _ = s.st.VerdictsForRun(id)
+	// Nil slices marshal to JSON null; the client expects arrays.
+	if d.AdapterRuns == nil {
+		d.AdapterRuns = []store.AdapterRun{}
+	}
+	if d.Findings == nil {
+		d.Findings = []store.StoredFinding{}
+	}
+	if d.Clusters == nil {
+		d.Clusters = []store.StoredCluster{}
+	}
+	if d.Verifications == nil {
+		d.Verifications = []store.StoredVerification{}
+	}
+	if d.Challenges == nil {
+		d.Challenges = []store.StoredChallenge{}
+	}
+	if d.Verdicts == nil {
+		d.Verdicts = []store.StoredVerdict{}
+	}
 	writeJSON(w, http.StatusOK, d)
 }
 

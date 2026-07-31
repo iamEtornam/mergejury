@@ -64,7 +64,7 @@ header.shell nav a.router-link-active {
   color: var(--ink);
   font-weight: 600;
 }
-main.content { flex: 1; padding: 20px 24px 60px; max-width: 1400px; width: 100%; margin: 0 auto; }
+main.content { flex: 1; padding: 20px 24px 60px; max-width: 1400px; width: 100%; margin: 0 auto; overflow-x: auto; }
 
 h1 { font-size: 17px; font-weight: 650; margin: 0 0 14px; }
 h2 { font-size: 13px; font-weight: 650; color: var(--ink-dim); margin: 22px 0 8px; }
