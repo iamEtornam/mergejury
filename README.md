@@ -116,6 +116,26 @@ go build -o bin/site ./cmd/site   # or: GOOS=linux GOARCH=amd64 go build -o site
 
 Copy that one file to the host, run it, and point your reverse proxy at it. Nothing else to install: no runtime, no filesystem to mount, no web root to keep in sync.
 
+### Deploying with Dokploy, Coolify, or any Docker host
+
+Use the [Dockerfile](Dockerfile) — a two-stage build producing a 5.7 MB `scratch` image with no shell and no writable filesystem.
+
+| Setting | Value |
+|---|---|
+| Build Type | **Dockerfile** (not Railpack or Nixpacks) |
+| Build Path | **`/`** — the repo root, *not* `/site/` |
+| Port | **8080** |
+
+Both details matter. The build context has to be the repo root because the server embeds the page at compile time, so it needs `go.mod` and `site/` together; pointing a builder at `/site/` hands it a directory with no application in it, nothing starts, and the proxy answers 502. The container binds `:8080` on all interfaces through the `PORT` env var, so a platform that injects its own `PORT` is honoured automatically.
+
+```sh
+docker build -t mergejury-site .
+docker run --rm -p 8080:8080 mergejury-site
+```
+
+Dokploy's **Static** build type also works if you would rather not build a container: set Build Path to `/site/`, since that directory is already the finished site.
+
+
 **Caddy:**
 
 ```
