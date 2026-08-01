@@ -52,15 +52,6 @@ cd mergejury && go build -o bin/mergejury ./cmd/mergejury
 
 All three produce one static binary with the web console embedded; there is nothing else to deploy. Verify with `mergejury --version`.
 
-While the repository is private, both remote installs need credentials:
-
-```sh
-GITHUB_TOKEN=$(gh auth token) curl -fsSL mergejury.etornam.dev/install | sh   # binary
-GOPRIVATE=github.com/iamEtornam/* go install github.com/iamEtornam/mergejury/cmd/mergejury@latest
-```
-
-Private release assets are only reachable through the API, so the installer resolves the asset id when a token is present. Once the repo is public neither variable is needed.
-
 ### Requirements
 
 `git` on PATH. `ANTHROPIC_API_KEY` for the `modelapi` adapter, the challenger, and the judge. `GITHUB_TOKEN` for PR runs — use a dedicated machine-user or App token, since GitHub 422s self-approval and the reviewing identity should never be the authoring identity. Then whichever agent CLIs (`claude`, `cursor-agent`, `agy`) you configure; `mergejury adapters check` tells you which are missing or unauthenticated.

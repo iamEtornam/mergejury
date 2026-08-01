@@ -6,9 +6,8 @@
 # Override the install dir with PREFIX, or pin a version with VERSION:
 #   PREFIX=~/.local/bin VERSION=v0.1.0 ./install.sh
 #
-# While the repository is private, release assets need a token with repo
-# read access:
-#   GITHUB_TOKEN=ghp_... curl -fsSL mergejury.etornam.dev/install | sh
+# For a private fork, set GITHUB_TOKEN to a token with repo read access and
+# the installer will fetch release assets through the API.
 set -eu
 
 REPO=iamEtornam/mergejury
