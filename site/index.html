@@ -793,9 +793,10 @@ footer .links a:hover { color: var(--ink); }
       <dt><code class="inl">ANTHROPIC_API_KEY</code></dt>
       <dd>for the judge, the challenger, and the API reviewer.</dd>
       <dt><code class="inl">GITHUB_TOKEN</code></dt>
-      <dd>only for posting, and only in the posting step. Use a machine user or
-      an App installation: GitHub rejects self-approval, and the reviewing
-      identity should never be the authoring one.</dd>
+      <dd>only for posting, and only in the posting step. The GitHub API is
+      called straight from the binary, so there is no <code class="inl">gh</code>
+      CLI to install. Use a machine user or an App installation: GitHub rejects
+      self-approval, and the reviewing identity should never be the authoring one.</dd>
       <dt>Agent CLIs</dt>
       <dd>optional. <code class="inl">claude</code>, <code class="inl">cursor-agent</code>,
       <code class="inl">agy</code>: whichever you configure. Configure none and the

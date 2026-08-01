@@ -54,7 +54,7 @@ All three produce one static binary with the web console embedded; there is noth
 
 ### Requirements
 
-`git` on PATH. `ANTHROPIC_API_KEY` for the `modelapi` adapter, the challenger, and the judge. `GITHUB_TOKEN` for PR runs — use a dedicated machine-user or App token, since GitHub 422s self-approval and the reviewing identity should never be the authoring identity. Then whichever agent CLIs (`claude`, `cursor-agent`, `agy`) you configure; `mergejury adapters check` tells you which are missing or unauthenticated.
+`git` on PATH. `ANTHROPIC_API_KEY` for the `modelapi` adapter, the challenger, and the judge. `GITHUB_TOKEN` for PR runs (the GitHub REST API is called directly from the binary, so the `gh` CLI is *not* required) — use a dedicated machine-user or App token, since GitHub 422s self-approval and the reviewing identity should never be the authoring identity. Then whichever agent CLIs (`claude`, `cursor-agent`, `agy`) you configure; `mergejury adapters check` tells you which are missing or unauthenticated.
 
 ## Run
 
