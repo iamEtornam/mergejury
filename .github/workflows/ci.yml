@@ -6,11 +6,26 @@ on:
   pull_request:
 
 jobs:
+  # site/install is the copy the static host serves at /install. It must stay
+  # byte-identical to the canonical install.sh, so drift fails the build.
+  installer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: sh -n install.sh
+      - name: site/install matches install.sh
+        run: |
+          if ! cmp -s install.sh site/install; then
+            echo "site/install is stale. Run: cp install.sh site/install" >&2
+            diff install.sh site/install || true
+            exit 1
+          fi
+
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
       - run: go vet ./...
@@ -21,8 +36,8 @@ jobs:
   web:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm

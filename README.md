@@ -107,15 +107,17 @@ The golden diff fixtures in [testdata/diffs](testdata/diffs) pin the commentable
 
 ## Hosting the site
 
-[The site workflow](.github/workflows/site.yml) publishes `site/` to GitHub Pages on every change and copies `install.sh` into the output as `/install`, so the installer is never committed twice and cannot drift. Enable it under Settings → Pages → Source: GitHub Actions, then set the domain:
+The site is the [site/](site) directory: fully static, no build step, no runtime. Serve that directory at the document root and the short installer URL works, because `site/install` is the installer.
+
+`site/install` is a committed copy of the canonical [install.sh](install.sh); CI fails if the two drift, so after editing the installer run:
 
 ```sh
-gh variable set SITE_DOMAIN --body mergejury.etornam.dev
+cp install.sh site/install
 ```
 
-GitHub Pages needs a public repo or a paid plan. On a private repo use Cloudflare Pages instead: output directory `site`, build command `cp install.sh site/install`. Either way `_headers` serves `/install` as `text/plain`.
+Any static host works. For a self-hosted reverse proxy, point the vhost's root at `site/`. For Cloudflare Pages or Netlify, set the output directory to `site` (`_headers` then serves `/install` as `text/plain`). For GitHub Pages, [the site workflow](.github/workflows/site.yml) publishes it on every change — enable Settings → Pages → Source: GitHub Actions and set `gh variable set SITE_DOMAIN --body mergejury.etornam.dev`; note Pages needs a public repo or a paid plan.
 
-If you use a different domain, change it in `SITE_DOMAIN` and in the canonical/OG URLs at the top of [site/index.html](site/index.html), [site/robots.txt](site/robots.txt), and [site/sitemap.xml](site/sitemap.xml).
+If the domain changes, update the absolute URLs in the head of [site/index.html](site/index.html) plus [site/robots.txt](site/robots.txt), [site/sitemap.xml](site/sitemap.xml), and the comment header in [install.sh](install.sh).
 
 ## Releasing
 
