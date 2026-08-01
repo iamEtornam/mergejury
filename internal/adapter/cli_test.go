@@ -211,3 +211,47 @@ func TestCrashedNonzeroExit(t *testing.T) {
 		t.Error("crashed should be retryable once")
 	}
 }
+
+// A tool can report a valid interactive login while its headless mode still
+// demands an API key. Observed with cursor-agent: `status` says "Login
+// successful", then `-p` exits "Authentication required ... set
+// CURSOR_API_KEY". The probe must fail rather than green-light it.
+func TestProbeFailsOnMissingRequiredEnv(t *testing.T) {
+	t.Setenv("CURSOR_API_KEY", "")
+	fr := &fakeRunner{help: helpAll, results: []ExecResult{{Stdout: "Login successful"}}}
+	pr := testAdapter(t, "cursor", fr).Probe(context.Background())
+	if pr.OK {
+		t.Fatal("probe passed without CURSOR_API_KEY; it must not")
+	}
+	if !strings.Contains(pr.Detail, "CURSOR_API_KEY") {
+		t.Errorf("detail should name the variable: %q", pr.Detail)
+	}
+	if !strings.Contains(pr.Remediation, "CURSOR_API_KEY") {
+		t.Errorf("remediation should say how to fix it: %q", pr.Remediation)
+	}
+}
+
+func TestProbePassesWithRequiredEnvSet(t *testing.T) {
+	t.Setenv("CURSOR_API_KEY", "test-key")
+	fr := &fakeRunner{help: helpAll, results: []ExecResult{{Stdout: "Login successful"}}}
+	pr := testAdapter(t, "cursor", fr).Probe(context.Background())
+	if !pr.OK {
+		t.Fatalf("probe should pass with the key set: %s", pr.Detail)
+	}
+}
+
+// The run-time error string cursor actually emits must be classified as an
+// auth failure, not a generic crash, so it is never retried.
+func TestCursorRuntimeAuthErrorClassified(t *testing.T) {
+	fr := &fakeRunner{help: helpAll, results: []ExecResult{{
+		Stderr:   "Error: Authentication required. Please run 'agent login' first, or set CURSOR_API_KEY environment variable.",
+		ExitCode: 1,
+	}}}
+	res := testAdapter(t, "cursor", fr).Review(context.Background(), pkt(), "")
+	if res.Status != StatusAuthError {
+		t.Fatalf("status = %s, want auth_error", res.Status)
+	}
+	if res.Status.Retryable() {
+		t.Error("auth_error must not be retryable")
+	}
+}

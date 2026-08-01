@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -63,6 +64,11 @@ type cliAdapter struct {
 	// authProbe is a cheap authenticated subcommand ("status", "models").
 	// Empty means auth can only be confirmed by a real run.
 	authProbe []string
+	// requiredEnv names environment variables a headless run needs. Some
+	// tools report an interactive login as valid while their non-interactive
+	// mode still demands an API key, so the probe has to check separately or
+	// it green-lights a reviewer that fails at run time.
+	requiredEnv []string
 	// authErrPatterns classify stderr/stdout as an auth failure.
 	authErrPatterns []*regexp.Regexp
 	// denyPatterns detect soft-denied tool use on stderr (exit 0, shallow
@@ -113,6 +119,13 @@ func (c *cliAdapter) Probe(ctx context.Context) ProbeResult {
 	for _, f := range c.wantFlags {
 		if !flags[f] {
 			missing = append(missing, f)
+		}
+	}
+	for _, key := range c.requiredEnv {
+		if os.Getenv(key) == "" {
+			pr.Detail = fmt.Sprintf("%s is not set", key)
+			pr.Remediation = fmt.Sprintf("set %s; %s needs it for headless runs even when an interactive login exists", key, c.binary)
+			return pr
 		}
 	}
 	if len(c.authProbe) > 0 {
@@ -336,9 +349,10 @@ func newCursor(cfg config.Adapter, ps *prompts.Set, runner Runner) Reviewer {
 			}
 			return args
 		},
-		authProbe: []string{"status"},
+		authProbe:   []string{"status"},
+		requiredEnv: []string{"CURSOR_API_KEY"},
 		authErrPatterns: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)(not logged in|unauthorized|invalid api key|please run.*login|authentication failed)`),
+			regexp.MustCompile(`(?i)(not logged in|unauthorized|invalid api key|please run.*login|authentication (failed|required))`),
 		},
 	}
 }
