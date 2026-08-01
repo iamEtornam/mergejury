@@ -330,6 +330,101 @@ nav .links a:hover { color: var(--ink); }
 }
 .verdict .law .statement { max-width: 26ch; }
 
+/* ---------- install ---------- */
+.install { padding-top: 14vh; }
+.install .lead { margin-top: 22px; color: var(--dim); max-width: 56ch; font-size: 16px; }
+.sub-head {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--amber);
+  margin: 8vh 0 0;
+}
+.routes { margin-top: 38px; }
+.route {
+  display: grid;
+  grid-template-columns: minmax(150px, 190px) 1fr;
+  gap: 28px;
+  padding: 22px 0;
+  border-top: 1px solid var(--edge);
+}
+.route:last-child { border-bottom: 1px solid var(--edge); }
+.route .label { font-size: 14.5px; line-height: 1.45; }
+.route .label .sub { color: var(--faint); font-size: 13px; }
+/* min-width: 0 lets a long command shrink and scroll inside its own box.
+   Without it, grid and flex children refuse to go below their content width
+   and push the whole page into horizontal scroll. */
+.route .body, .step > div { min-width: 0; }
+.cmdline { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-width: 0; }
+.cmdline code {
+  font-family: var(--mono);
+  font-size: 14px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  padding: 9px 14px;
+  overflow-x: auto;
+  max-width: 100%;
+}
+.cmdline code .p { color: var(--faint); }
+.copy-mini {
+  font: 500 12.5px var(--sans);
+  color: var(--dim);
+  background: transparent;
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  padding: 7px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.copy-mini:hover { color: var(--ink); border-color: rgba(236, 228, 214, 0.26); }
+.copy-mini:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.route .body > p { margin-top: 12px; color: var(--dim); font-size: 14.5px; max-width: 62ch; }
+code.inl { font-family: var(--mono); font-size: 0.9em; color: var(--ink); }
+.caveat {
+  margin-top: 26px;
+  color: var(--faint);
+  font-size: 13.5px;
+  max-width: 68ch;
+  line-height: 1.6;
+}
+.steps { margin-top: 26px; }
+.step {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 20px;
+  padding: 20px 0;
+  border-top: 1px solid var(--edge);
+}
+.step:last-child { border-bottom: 1px solid var(--edge); }
+.step .n { font-family: var(--mono); font-size: 13px; color: var(--faint); padding-top: 10px; }
+.step code {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 14px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  padding: 9px 14px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.step code .p { color: var(--faint); }
+.step p { margin-top: 12px; color: var(--dim); font-size: 14.5px; max-width: 62ch; }
+.needs { margin-top: 26px; }
+.needs dt {
+  font-size: 14.5px;
+  padding-top: 18px;
+  border-top: 1px solid var(--edge);
+}
+.needs dd {
+  margin: 6px 0 18px;
+  color: var(--dim);
+  font-size: 14.5px;
+  max-width: 62ch;
+}
+.needs dd:last-child { border-bottom: 1px solid var(--edge); padding-bottom: 18px; margin-bottom: 0; }
+
 /* ---------- operate ---------- */
 .operate { padding-top: 14vh; }
 .operate .cmds { margin-top: 40px; }
@@ -397,6 +492,11 @@ footer .links a:hover { color: var(--ink); }
   .verdict .row { grid-template-columns: 1fr; gap: 6px; }
   .verdict .row .event { text-align: left; }
   .operate .cmd { grid-template-columns: 1fr; gap: 4px; }
+  .route { grid-template-columns: 1fr; gap: 12px; }
+  .step { grid-template-columns: 1fr; gap: 8px; }
+  .step .n { padding-top: 0; }
+  .cmdline code, .step code { font-size: 13px; }
+  .sub-head { margin-top: 7vh; }
   footer .top { grid-template-columns: 1fr; }
   footer .links { justify-self: start; }
 }
@@ -409,6 +509,7 @@ footer .links a:hover { color: var(--ink); }
   <div class="links">
     <a href="#gauntlet">the gauntlet</a>
     <a href="#verdict">the verdict</a>
+    <a href="#install">install</a>
     <a href="https://github.com/iamEtornam/mergejury" rel="noopener">source</a>
   </div>
 </nav>
@@ -425,7 +526,7 @@ footer .links a:hover { color: var(--ink); }
       </p>
       <div class="try">
         <code id="try-cmd"><span class="p">$</span> mergejury review 4127 --dry-run</code>
-        <button class="copy-btn" id="copy" type="button">copy</button>
+        <button class="copy-btn" type="button" data-copy="try-cmd">copy</button>
       </div>
     </div>
 
@@ -604,10 +705,111 @@ footer .links a:hover { color: var(--ink); }
     </div>
   </section>
 
+  <section class="install wrap" id="install">
+    <h2 class="statement">One binary. <span class="accent">Console included.</span></h2>
+    <p class="lead">No runtime, no database to provision, no service to stand up. The
+    reviewers are the CLIs you already have; everything else is compiled in.</p>
+
+    <div class="routes">
+      <div class="route">
+        <span class="label">macOS, Linux<br><span class="sub">no Go needed</span></span>
+        <div class="body">
+          <div class="cmdline">
+            <code id="cmd-curl"><span class="p">$</span> curl -fsSL mergejury.etornam.dev/install | sh</code>
+            <button class="copy-mini" type="button" data-copy="cmd-curl">copy</button>
+          </div>
+          <p>Detects your platform, verifies the SHA-256 against the release
+          checksums, and installs to <code class="inl">/usr/local/bin</code>.
+          Override with <code class="inl">PREFIX</code>, pin with <code class="inl">VERSION</code>.</p>
+        </div>
+      </div>
+
+      <div class="route">
+        <span class="label">With Go<br><span class="sub">1.25 or newer</span></span>
+        <div class="body">
+          <div class="cmdline">
+            <code id="cmd-go"><span class="p">$</span> go install github.com/iamEtornam/mergejury/cmd/mergejury@latest</code>
+            <button class="copy-mini" type="button" data-copy="cmd-go">copy</button>
+          </div>
+          <p>Builds from source at the latest release tag.</p>
+        </div>
+      </div>
+
+      <div class="route">
+        <span class="label">From source<br><span class="sub">to hack on it</span></span>
+        <div class="body">
+          <div class="cmdline">
+            <code id="cmd-src"><span class="p">$</span> git clone https://github.com/iamEtornam/mergejury.git &amp;&amp; cd mergejury &amp;&amp; go build -o bin/mergejury ./cmd/mergejury</code>
+            <button class="copy-mini" type="button" data-copy="cmd-src">copy</button>
+          </div>
+          <p>Windows: download the <code class="inl">.zip</code> from the releases page.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="caveat">The repository is private while this settles, so remote
+    installs need a GitHub token with read access:
+    <code class="inl">GITHUB_TOKEN=…</code> for the binary,
+    <code class="inl">GOPRIVATE=github.com/iamEtornam/*</code> for <code class="inl">go install</code>.</p>
+
+    <h3 class="sub-head">Then, in order</h3>
+    <div class="steps">
+      <div class="step">
+        <span class="n">01</span>
+        <div>
+          <code><span class="p">$</span> mergejury adapters check</code>
+          <p>Names every reviewer that is missing, unauthenticated, or running
+          with flags this build does not expect, each with the exact fix. Start
+          here; a run that fails at the adapter layer is the most confusing way
+          to meet this tool.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="n">02</span>
+        <div>
+          <code><span class="p">$</span> mergejury review --local</code>
+          <p>Reviews your working tree against a base ref. No pull request, no
+          posting, nothing leaves your machine except the diff you are reviewing.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="n">03</span>
+        <div>
+          <code><span class="p">$</span> mergejury review 4127 --dry-run</code>
+          <p>Renders the exact review it would post, comment for comment, and
+          posts nothing. Read it before you let it near a real pull request.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="n">04</span>
+        <div>
+          <code><span class="p">$</span> mergejury serve</code>
+          <p>The operator console on localhost: every finding, every drop and its
+          reason, every verdict, traceable end to end.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sub-head">What it needs</h3>
+    <dl class="needs">
+      <dt><code class="inl">git</code></dt>
+      <dd>on PATH. Worktrees and diffs go through the real binary, not a library.</dd>
+      <dt><code class="inl">ANTHROPIC_API_KEY</code></dt>
+      <dd>for the judge, the challenger, and the API reviewer.</dd>
+      <dt><code class="inl">GITHUB_TOKEN</code></dt>
+      <dd>only for posting, and only in the posting step. Use a machine user or
+      an App installation: GitHub rejects self-approval, and the reviewing
+      identity should never be the authoring one.</dd>
+      <dt>Agent CLIs</dt>
+      <dd>optional. <code class="inl">claude</code>, <code class="inl">cursor-agent</code>,
+      <code class="inl">agy</code>: whichever you configure. Configure none and the
+      API reviewer runs alone.</dd>
+    </dl>
+  </section>
+
   <section class="operate wrap">
     <h2 class="statement">Built to be operated,<br>not believed.</h2>
     <div class="cmds">
-      <div class="cmd"><code><span class="p">$</span> curl -fsSL mergejury.etornam.dev/install | sh</code><span class="what">one static binary, operator console included</span></div>
       <div class="cmd"><code><span class="p">$</span> mergejury review --local</code><span class="what">review the working tree before you push. No PR, no posting</span></div>
       <div class="cmd"><code><span class="p">$</span> mergejury adapters check</code><span class="what">which reviewer is broken, and the exact fix</span></div>
       <div class="cmd"><code><span class="p">$</span> mergejury runs replay 7</code><span class="what">re-judge a stored run for cents; tune prompts against real findings</span></div>
@@ -624,6 +826,7 @@ footer .links a:hover { color: var(--ink); }
     <div class="links">
       <a href="#gauntlet">gauntlet</a>
       <a href="#verdict">verdict</a>
+      <a href="#install">install</a>
       <a href="https://github.com/iamEtornam/mergejury" rel="noopener">source</a>
     </div>
   </div>
@@ -631,22 +834,29 @@ footer .links a:hover { color: var(--ink); }
 </footer>
 
 <script>
-document.getElementById('copy').addEventListener('click', async (e) => {
-  const btn = e.currentTarget;
-  try {
-    await navigator.clipboard.writeText('mergejury review 4127 --dry-run');
-    btn.textContent = 'copied';
-  } catch {
-    // Clipboard unavailable: select the command so a manual copy works.
-    const range = document.createRange();
-    range.selectNodeContents(document.getElementById('try-cmd'));
-    const sel = getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-    btn.textContent = 'selected, press copy';
-  }
-  setTimeout(() => { btn.textContent = 'copy'; }, 2000);
-});
+// Copy buttons read the command out of the DOM, so the copied text can never
+// drift from the text rendered on screen. The leading shell prompt is stripped.
+for (const btn of document.querySelectorAll('[data-copy]')) {
+  btn.addEventListener('click', async () => {
+    const el = document.getElementById(btn.dataset.copy);
+    if (!el) return;
+    const text = el.textContent.replace(/^\s*\$\s*/, '').trim();
+    const label = btn.textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.textContent = 'copied';
+    } catch {
+      // Clipboard unavailable: select the command so a manual copy works.
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const sel = getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      btn.textContent = 'selected';
+    }
+    setTimeout(() => { btn.textContent = label; }, 2000);
+  });
+}
 </script>
 </body>
 </html>
