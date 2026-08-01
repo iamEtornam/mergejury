@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"mergejury/internal/finding"
-	"mergejury/internal/packet"
+	"github.com/iamEtornam/mergejury/internal/finding"
+	"github.com/iamEtornam/mergejury/internal/packet"
 )
 
 // Drop reasons, recorded on every dropped finding.

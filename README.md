@@ -21,13 +21,38 @@ posted review ◀── computed verdict ◀── judge ◀── challenger + 
 - **Judge**: one model, one cluster at a time, default verdict `drop`. It rewrites published comment bodies into one voice.
 - **Verdict** ([internal/forge](internal/forge)): the review event (`APPROVE` / `REQUEST_CHANGES` / `COMMENT`) is **computed, never stated** — arithmetic over the published-finding set. A degraded run can request changes but can never approve, and that is not configurable. Fork PRs are never approved by default.
 
-## Install and run
+## Install
+
+**Prebuilt binary** (macOS and Linux, no Go needed):
 
 ```sh
-go build -o bin/mergejury ./cmd/mergejury
+curl -fsSL https://raw.githubusercontent.com/iamEtornam/mergejury/main/install.sh | sh
 ```
 
-One static binary; the web console is embedded. Requirements: `git` on PATH, `ANTHROPIC_API_KEY` for `modelapi`/challenger/judge, `GITHUB_TOKEN` for PR runs (a dedicated machine-user or App token — GitHub 422s self-approval, and the reviewing identity should never be the authoring identity), and whichever agent CLIs (`claude`, `cursor-agent`, `agy`) you configure.
+It picks the right archive for your OS and architecture, verifies the SHA-256 against the release checksums, and installs to `/usr/local/bin` (override with `PREFIX`, pin with `VERSION`). Windows: grab the `.zip` from [releases](https://github.com/iamEtornam/mergejury/releases).
+
+**With Go** (1.25+):
+
+```sh
+go install github.com/iamEtornam/mergejury/cmd/mergejury@latest
+```
+
+**From source:**
+
+```sh
+git clone https://github.com/iamEtornam/mergejury.git
+cd mergejury && go build -o bin/mergejury ./cmd/mergejury
+```
+
+All three produce one static binary with the web console embedded; there is nothing else to deploy. Verify with `mergejury --version`.
+
+While the repository is private, both remote installs need credentials: `export GOPRIVATE=github.com/iamEtornam/*` for `go install`, and a token for the release download.
+
+### Requirements
+
+`git` on PATH. `ANTHROPIC_API_KEY` for the `modelapi` adapter, the challenger, and the judge. `GITHUB_TOKEN` for PR runs — use a dedicated machine-user or App token, since GitHub 422s self-approval and the reviewing identity should never be the authoring identity. Then whichever agent CLIs (`claude`, `cursor-agent`, `agy`) you configure; `mergejury adapters check` tells you which are missing or unauthenticated.
+
+## Run
 
 ```sh
 mergejury adapters check              # probe install/auth/flags per adapter, with remediation
@@ -37,7 +62,7 @@ mergejury review https://github.com/o/r/pull/123
 mergejury runs list                   # stored runs
 mergejury runs show 7 --raw           # everything, incl. dropped findings and raw output
 mergejury runs replay 7               # re-run cluster/challenge/judge on stored findings, no adapters
-mergejury stats                       # cost per published comment per adapter — the survival metric
+mergejury stats                       # cost per published comment per adapter, the survival metric
 mergejury serve                       # web console on 127.0.0.1:7777
 ```
 
@@ -66,6 +91,16 @@ cd web && npm run build          # refresh embedded assets (web/dist is committe
 ```
 
 The golden diff fixtures in [testdata/diffs](testdata/diffs) pin the commentable-line sets and the exact model-facing rendering — new file, deleted file, rename, rename+edits, CRLF, binary, multi-hunk, hunk at line 1, hunk at EOF, no trailing newline. This is where the off-by-ones live.
+
+## Releasing
+
+Tag and push; [the release workflow](.github/workflows/release.yml) cross-compiles every target from one runner (the SQLite driver is cgo-free, which is why this stays simple), writes `checksums.txt`, and publishes a GitHub release.
+
+```sh
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+Rebuild `web/dist` before tagging if the console changed: it is committed because `go:embed` needs it present at build time, so a stale `dist` ships a stale console.
 
 ## Before enabling verdicts on a real repo
 

@@ -12,12 +12,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"mergejury/internal/anthropic"
-	"mergejury/internal/cluster"
-	"mergejury/internal/finding"
-	"mergejury/internal/packet"
-	"mergejury/internal/verify"
-	"mergejury/prompts"
+	"github.com/iamEtornam/mergejury/internal/anthropic"
+	"github.com/iamEtornam/mergejury/internal/cluster"
+	"github.com/iamEtornam/mergejury/internal/finding"
+	"github.com/iamEtornam/mergejury/internal/packet"
+	"github.com/iamEtornam/mergejury/internal/verify"
+	"github.com/iamEtornam/mergejury/prompts"
 )
 
 // CodeContext renders the code around an anchor with real line numbers.

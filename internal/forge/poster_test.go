@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"mergejury/internal/finding"
+	"github.com/iamEtornam/mergejury/internal/finding"
 )
 
 // fakeForge records calls and scripts failures.

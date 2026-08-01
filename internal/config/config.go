@@ -11,7 +11,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"mergejury/internal/finding"
+	"github.com/iamEtornam/mergejury/internal/finding"
 )
 
 type Adapter struct {

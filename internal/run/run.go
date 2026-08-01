@@ -14,17 +14,17 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"mergejury/internal/adapter"
-	"mergejury/internal/adjudicate"
-	"mergejury/internal/cluster"
-	"mergejury/internal/config"
-	"mergejury/internal/finding"
-	"mergejury/internal/forge"
-	"mergejury/internal/packet"
-	"mergejury/internal/store"
-	"mergejury/internal/validate"
-	"mergejury/internal/verify"
-	"mergejury/prompts"
+	"github.com/iamEtornam/mergejury/internal/adapter"
+	"github.com/iamEtornam/mergejury/internal/adjudicate"
+	"github.com/iamEtornam/mergejury/internal/cluster"
+	"github.com/iamEtornam/mergejury/internal/config"
+	"github.com/iamEtornam/mergejury/internal/finding"
+	"github.com/iamEtornam/mergejury/internal/forge"
+	"github.com/iamEtornam/mergejury/internal/packet"
+	"github.com/iamEtornam/mergejury/internal/store"
+	"github.com/iamEtornam/mergejury/internal/validate"
+	"github.com/iamEtornam/mergejury/internal/verify"
+	"github.com/iamEtornam/mergejury/prompts"
 )
 
 type Options struct {

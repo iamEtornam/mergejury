@@ -5,7 +5,7 @@ package cluster
 import (
 	"sort"
 
-	"mergejury/internal/finding"
+	"github.com/iamEtornam/mergejury/internal/finding"
 )
 
 // Item is a kept finding with its store ID, ready to cluster.

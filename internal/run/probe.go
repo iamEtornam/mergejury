@@ -3,7 +3,7 @@ package run
 import (
 	"context"
 
-	"mergejury/internal/adapter"
+	"github.com/iamEtornam/mergejury/internal/adapter"
 )
 
 // ProbeAdapters checks every configured adapter: installed, authenticated,

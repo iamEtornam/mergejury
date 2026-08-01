@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"syscall"
@@ -17,15 +18,15 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"mergejury/internal/adapter"
-	"mergejury/internal/anthropic"
-	"mergejury/internal/config"
-	"mergejury/internal/forge"
-	"mergejury/internal/httpapi"
-	"mergejury/internal/packet"
-	"mergejury/internal/run"
-	"mergejury/internal/store"
-	"mergejury/prompts"
+	"github.com/iamEtornam/mergejury/internal/adapter"
+	"github.com/iamEtornam/mergejury/internal/anthropic"
+	"github.com/iamEtornam/mergejury/internal/config"
+	"github.com/iamEtornam/mergejury/internal/forge"
+	"github.com/iamEtornam/mergejury/internal/httpapi"
+	"github.com/iamEtornam/mergejury/internal/packet"
+	"github.com/iamEtornam/mergejury/internal/run"
+	"github.com/iamEtornam/mergejury/internal/store"
+	"github.com/iamEtornam/mergejury/prompts"
 )
 
 // Exit codes per section 12.
@@ -99,10 +100,26 @@ func (a *app) orchestrator(withForge bool) (*run.Orchestrator, error) {
 	return o, nil
 }
 
+// version is stamped by the release build via
+// -ldflags "-X main.version=v1.2.3". For `go install` builds it stays
+// "dev" and the module version from the build info is used instead.
+var version = "dev"
+
+func versionString() string {
+	if version != "dev" {
+		return version
+	}
+	if bi, ok := debug.ReadBuildInfo(); ok && bi.Main.Version != "" && bi.Main.Version != "(devel)" {
+		return bi.Main.Version
+	}
+	return version
+}
+
 func newRoot() *cobra.Command {
 	root := &cobra.Command{
 		Use:           "mergejury",
 		Short:         "multi-reviewer code review harness",
+		Version:       versionString(),
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}

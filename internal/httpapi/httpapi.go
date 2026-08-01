@@ -15,10 +15,10 @@ import (
 	"strings"
 	"time"
 
-	"mergejury/internal/run"
-	"mergejury/internal/store"
-	"mergejury/prompts"
-	"mergejury/web"
+	"github.com/iamEtornam/mergejury/internal/run"
+	"github.com/iamEtornam/mergejury/internal/store"
+	"github.com/iamEtornam/mergejury/prompts"
+	"github.com/iamEtornam/mergejury/web"
 )
 
 type Server struct {

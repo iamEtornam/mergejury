@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"time"
 
-	"mergejury/internal/config"
-	"mergejury/internal/finding"
-	"mergejury/internal/packet"
-	"mergejury/prompts"
+	"github.com/iamEtornam/mergejury/internal/config"
+	"github.com/iamEtornam/mergejury/internal/finding"
+	"github.com/iamEtornam/mergejury/internal/packet"
+	"github.com/iamEtornam/mergejury/prompts"
 )
 
 type Status string

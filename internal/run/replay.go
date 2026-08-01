@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"os"
 
-	"mergejury/internal/cluster"
-	"mergejury/internal/finding"
-	"mergejury/internal/forge"
-	"mergejury/internal/packet"
-	"mergejury/internal/validate"
+	"github.com/iamEtornam/mergejury/internal/cluster"
+	"github.com/iamEtornam/mergejury/internal/finding"
+	"github.com/iamEtornam/mergejury/internal/forge"
+	"github.com/iamEtornam/mergejury/internal/packet"
+	"github.com/iamEtornam/mergejury/internal/validate"
 )
 
 // Replay re-runs clustering, challenging, and judging against findings

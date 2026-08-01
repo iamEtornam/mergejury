@@ -12,8 +12,8 @@ import (
 	"regexp"
 	"strings"
 
-	"mergejury/internal/cluster"
-	"mergejury/internal/finding"
+	"github.com/iamEtornam/mergejury/internal/cluster"
+	"github.com/iamEtornam/mergejury/internal/finding"
 )
 
 const (

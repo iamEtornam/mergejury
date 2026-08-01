@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"mergejury/internal/config"
-	"mergejury/internal/packet"
-	"mergejury/prompts"
+	"github.com/iamEtornam/mergejury/internal/config"
+	"github.com/iamEtornam/mergejury/internal/packet"
+	"github.com/iamEtornam/mergejury/prompts"
 )
 
 const helpAll = `Usage:

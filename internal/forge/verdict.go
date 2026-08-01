@@ -3,7 +3,7 @@ package forge
 import (
 	"fmt"
 
-	"mergejury/internal/finding"
+	"github.com/iamEtornam/mergejury/internal/finding"
 )
 
 // VerdictInput is everything the 9.1 rule needs. The event is a

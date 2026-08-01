@@ -1,4 +1,4 @@
-module mergejury
+module github.com/iamEtornam/mergejury
 
 go 1.25.5
 

@@ -13,12 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"mergejury/internal/adapter"
-	"mergejury/internal/anthropic"
-	"mergejury/internal/config"
-	"mergejury/internal/forge"
-	"mergejury/internal/store"
-	"mergejury/prompts"
+	"github.com/iamEtornam/mergejury/internal/adapter"
+	"github.com/iamEtornam/mergejury/internal/anthropic"
+	"github.com/iamEtornam/mergejury/internal/config"
+	"github.com/iamEtornam/mergejury/internal/forge"
+	"github.com/iamEtornam/mergejury/internal/store"
+	"github.com/iamEtornam/mergejury/prompts"
 )
 
 // ---- fake forge ----

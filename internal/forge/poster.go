@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"mergejury/internal/finding"
+	"github.com/iamEtornam/mergejury/internal/finding"
 )
 
 // PublishedItem is one judge-published cluster, ready to render.

@@ -13,7 +13,7 @@ import (
 
 	_ "modernc.org/sqlite"
 
-	"mergejury/internal/finding"
+	"github.com/iamEtornam/mergejury/internal/finding"
 )
 
 //go:embed all:migrations
