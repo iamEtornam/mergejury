@@ -753,6 +753,17 @@ footer .links a:hover { color: var(--ink); }
       <div class="step">
         <span class="n">01</span>
         <div>
+          <code><span class="p">$</span> mergejury init</code>
+          <p>Finds the reviewers you already have, tells you what is missing and
+          how to fix it, and writes a config wired to the tools on your machine.
+          Nothing missing is fatal: it degrades to whatever is available, down to
+          the API reviewer alone. Credentials stay in your environment, never in
+          the file.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="n">02</span>
+        <div>
           <code><span class="p">$</span> mergejury adapters check</code>
           <p>Names every reviewer that is missing, unauthenticated, or running
           with flags this build does not expect, each with the exact fix. Start
@@ -761,7 +772,7 @@ footer .links a:hover { color: var(--ink); }
         </div>
       </div>
       <div class="step">
-        <span class="n">02</span>
+        <span class="n">03</span>
         <div>
           <code><span class="p">$</span> mergejury review --local</code>
           <p>Reviews your working tree against a base ref. No pull request, no
@@ -769,7 +780,7 @@ footer .links a:hover { color: var(--ink); }
         </div>
       </div>
       <div class="step">
-        <span class="n">03</span>
+        <span class="n">04</span>
         <div>
           <code><span class="p">$</span> mergejury review 4127 --dry-run</code>
           <p>Renders the exact review it would post, comment for comment, and
@@ -777,7 +788,7 @@ footer .links a:hover { color: var(--ink); }
         </div>
       </div>
       <div class="step">
-        <span class="n">04</span>
+        <span class="n">05</span>
         <div>
           <code><span class="p">$</span> mergejury serve</code>
           <p>The operator console on localhost: every finding, every drop and its

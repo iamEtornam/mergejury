@@ -56,6 +56,18 @@ All three produce one static binary with the web console embedded; there is noth
 
 `git` on PATH. `ANTHROPIC_API_KEY` for the `modelapi` adapter, the challenger, and the judge. `GITHUB_TOKEN` for PR runs (the GitHub REST API is called directly from the binary, so the `gh` CLI is *not* required) — use a dedicated machine-user or App token, since GitHub 422s self-approval and the reviewing identity should never be the authoring identity. Then whichever agent CLIs (`claude`, `cursor-agent`, `agy`) you configure; `mergejury adapters check` tells you which are missing or unauthenticated.
 
+## Set up
+
+```sh
+mergejury init
+```
+
+Probes every reviewer it knows how to drive, reports what is missing and the exact fix, and writes a `mergejury.yaml` wired to the tools this machine actually has. A missing tool is not an error: mergejury degrades to whatever is available, down to the API reviewer alone. Verdicts are written disabled, because turning them on should be a decision.
+
+Credentials are never written to the config. They are read from the environment at run time, so the file is safe to commit.
+
+`--print` shows the config without writing it, `--yes` skips the prompt for scripts, `--force` overwrites an existing file. Without a terminal it never blocks: it prints what it would do and writes nothing unless `--yes` is passed.
+
 ## Run
 
 ```sh
