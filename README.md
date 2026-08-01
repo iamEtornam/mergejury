@@ -107,15 +107,67 @@ The golden diff fixtures in [testdata/diffs](testdata/diffs) pin the commentable
 
 ## Hosting the site
 
-The site is the [site/](site) directory: fully static, no build step, no runtime. Serve that directory at the document root and the short installer URL works, because `site/install` is the installer.
-
-`site/install` is a committed copy of the canonical [install.sh](install.sh); CI fails if the two drift, so after editing the installer run:
+The site is one self-contained binary. [cmd/site](cmd/site) embeds the page and every asset, serves `/install` as `text/plain` (so `curl … | sh` works), sets security headers, and refuses directory listings and non-read methods.
 
 ```sh
-cp install.sh site/install
+go build -o bin/site ./cmd/site   # or: GOOS=linux GOARCH=amd64 go build -o site-linux ./cmd/site
+./bin/site                        # 127.0.0.1:8080, or set PORT / -addr
 ```
 
-Any static host works. For a self-hosted reverse proxy, point the vhost's root at `site/`. For Cloudflare Pages or Netlify, set the output directory to `site` (`_headers` then serves `/install` as `text/plain`). For GitHub Pages, [the site workflow](.github/workflows/site.yml) publishes it on every change — enable Settings → Pages → Source: GitHub Actions and set `gh variable set SITE_DOMAIN --body mergejury.etornam.dev`; note Pages needs a public repo or a paid plan.
+Copy that one file to the host, run it, and point your reverse proxy at it. Nothing else to install: no runtime, no filesystem to mount, no web root to keep in sync.
+
+**Caddy:**
+
+```
+mergejury.etornam.dev {
+	reverse_proxy 127.0.0.1:8080
+}
+```
+
+**nginx:**
+
+```nginx
+server {
+	server_name mergejury.etornam.dev;
+	location / {
+		proxy_pass http://127.0.0.1:8080;
+		proxy_set_header Host $host;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+	}
+}
+```
+
+A `502` from the proxy means it is running but the upstream is not: start the server, confirm `curl -sS localhost:8080/` locally, then check the proxy points at that same port.
+
+**systemd**, to keep it running:
+
+```ini
+# /etc/systemd/system/mergejury-site.service
+[Unit]
+Description=mergejury site
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/mergejury-site -addr 127.0.0.1:8080
+Restart=always
+DynamicUser=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```sh
+sudo systemctl enable --now mergejury-site
+```
+
+Static hosts work too, since [site/](site) is a plain directory with no build step: set the output directory to `site` (Cloudflare Pages, Netlify — `_headers` then serves `/install` as text), or use [the site workflow](.github/workflows/site.yml) for GitHub Pages, which needs a public repo or a paid plan.
+
+`site/install` is a committed copy of the canonical [install.sh](install.sh), and CI fails if they drift, so after editing the installer run `cp install.sh site/install`.
 
 If the domain changes, update the absolute URLs in the head of [site/index.html](site/index.html) plus [site/robots.txt](site/robots.txt), [site/sitemap.xml](site/sitemap.xml), and the comment header in [install.sh](install.sh).
 

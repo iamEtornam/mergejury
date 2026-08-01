@@ -39,6 +39,13 @@ jobs:
               tar -czf "dist/${name}.tar.gz" -C build "$bin"
             fi
             rm -f "build/$bin"
+
+            # The landing-page server, for hosts without a Go toolchain.
+            [ "$os" = windows ] && continue
+            CGO_ENABLED=0 GOOS="$os" GOARCH="$arch" \
+              go build -trimpath -ldflags "-s -w" -o build/mergejury-site ./cmd/site
+            tar -czf "dist/mergejury-site_${VERSION}_${os}_${arch}.tar.gz" -C build mergejury-site
+            rm -f build/mergejury-site
           done
           (cd dist && sha256sum * > checksums.txt)
           ls -la dist
