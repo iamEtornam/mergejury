@@ -29,7 +29,7 @@ posted review ◀── computed verdict ◀── judge ◀── challenger + 
 curl -fsSL mergejury.etornam.dev/install | sh
 ```
 
-That short URL needs the site deployed ([the site workflow](.github/workflows/site.yml) serves `install.sh` at `/install`). Until the domain is live, the same script works straight from the repo:
+The same script also works straight from the repo, if you would rather not trust a redirect:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/iamEtornam/mergejury/main/install.sh | sh
@@ -188,7 +188,7 @@ WantedBy=multi-user.target
 sudo systemctl enable --now mergejury-site
 ```
 
-Static hosts work too, since [site/](site) is a plain directory with no build step: set the output directory to `site` (Cloudflare Pages, Netlify — `_headers` then serves `/install` as text), or use [the site workflow](.github/workflows/site.yml) for GitHub Pages, which needs a public repo or a paid plan.
+Static hosts work too, since [site/](site) is a plain directory with no build step: point the output directory at `site` (Cloudflare Pages, Netlify, GitHub Pages — `_headers` then serves `/install` as text). `site/install` is committed, so no build step is needed to produce it.
 
 `site/install` is a committed copy of the canonical [install.sh](install.sh), and CI fails if they drift, so after editing the installer run `cp install.sh site/install`.
 
