@@ -1,0 +1,60 @@
+name: site
+
+# Publishes site/ to GitHub Pages, which is what makes
+#   curl -fsSL <domain>/install | sh
+# work: install.sh is copied into the published output as /install, so there
+# is never a second committed copy to drift out of sync.
+#
+# Setup, once: Settings -> Pages -> Source: GitHub Actions. For a custom
+# domain also set the repo variable SITE_DOMAIN (gh variable set SITE_DOMAIN
+# --body mergejury.etornam.dev) and point the domain's DNS at GitHub Pages.
+#
+# Pages needs a public repo or a paid plan. On a private repo, Cloudflare
+# Pages is the free alternative: point it at this repo with output directory
+# "site" and build command "cp install.sh site/install".
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", "install.sh", ".github/workflows/site.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: assemble
+        env:
+          SITE_DOMAIN: ${{ vars.SITE_DOMAIN }}
+        run: |
+          set -eu
+          cp -r site _site
+          # The installer, served short: /install
+          cp install.sh _site/install
+          # Serve files literally; no Jekyll processing.
+          touch _site/.nojekyll
+          if [ -n "${SITE_DOMAIN:-}" ]; then
+            echo "$SITE_DOMAIN" > _site/CNAME
+            echo "custom domain: $SITE_DOMAIN"
+          fi
+          ls -la _site
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4

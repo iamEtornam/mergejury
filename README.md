@@ -26,6 +26,12 @@ posted review ◀── computed verdict ◀── judge ◀── challenger + 
 **Prebuilt binary** (macOS and Linux, no Go needed):
 
 ```sh
+curl -fsSL mergejury.etornam.dev/install | sh
+```
+
+That short URL needs the site deployed ([the site workflow](.github/workflows/site.yml) serves `install.sh` at `/install`). Until the domain is live, the same script works straight from the repo:
+
+```sh
 curl -fsSL https://raw.githubusercontent.com/iamEtornam/mergejury/main/install.sh | sh
 ```
 
@@ -46,7 +52,14 @@ cd mergejury && go build -o bin/mergejury ./cmd/mergejury
 
 All three produce one static binary with the web console embedded; there is nothing else to deploy. Verify with `mergejury --version`.
 
-While the repository is private, both remote installs need credentials: `export GOPRIVATE=github.com/iamEtornam/*` for `go install`, and a token for the release download.
+While the repository is private, both remote installs need credentials:
+
+```sh
+GITHUB_TOKEN=$(gh auth token) curl -fsSL mergejury.etornam.dev/install | sh   # binary
+GOPRIVATE=github.com/iamEtornam/* go install github.com/iamEtornam/mergejury/cmd/mergejury@latest
+```
+
+Private release assets are only reachable through the API, so the installer resolves the asset id when a token is present. Once the repo is public neither variable is needed.
 
 ### Requirements
 
@@ -91,6 +104,18 @@ cd web && npm run build          # refresh embedded assets (web/dist is committe
 ```
 
 The golden diff fixtures in [testdata/diffs](testdata/diffs) pin the commentable-line sets and the exact model-facing rendering — new file, deleted file, rename, rename+edits, CRLF, binary, multi-hunk, hunk at line 1, hunk at EOF, no trailing newline. This is where the off-by-ones live.
+
+## Hosting the site
+
+[The site workflow](.github/workflows/site.yml) publishes `site/` to GitHub Pages on every change and copies `install.sh` into the output as `/install`, so the installer is never committed twice and cannot drift. Enable it under Settings → Pages → Source: GitHub Actions, then set the domain:
+
+```sh
+gh variable set SITE_DOMAIN --body mergejury.etornam.dev
+```
+
+GitHub Pages needs a public repo or a paid plan. On a private repo use Cloudflare Pages instead: output directory `site`, build command `cp install.sh site/install`. Either way `_headers` serves `/install` as `text/plain`.
+
+If you use a different domain, change it in `SITE_DOMAIN` and in the canonical/OG URLs at the top of [site/index.html](site/index.html), [site/robots.txt](site/robots.txt), and [site/sitemap.xml](site/sitemap.xml).
 
 ## Releasing
 

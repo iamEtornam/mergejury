@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>mergejury · AI code review that posts only what survives</title>
 <meta name="description" content="mergejury runs several AI reviewers over your pull request, makes every finding fight for its life, and posts one review with only the comments that survive.">
-<!-- Canonical domain: replace mergejury.dev everywhere in this head (and in
-     robots.txt / sitemap.xml) if the site ships on a different domain. -->
-<link rel="canonical" href="https://mergejury.dev/">
+<!-- Live at mergejury.etornam.dev. If the domain ever changes, update the
+     absolute URLs in this head plus robots.txt, sitemap.xml, install.sh, and
+     the SITE_DOMAIN repo variable. -->
+<link rel="canonical" href="https://mergejury.etornam.dev/">
 <meta name="theme-color" content="#161310">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -17,15 +18,15 @@
 <meta property="og:site_name" content="mergejury">
 <meta property="og:title" content="mergejury · AI code review that posts only what survives">
 <meta property="og:description" content="Several AI reviewers, one lens each. Every finding fights for its life: validation, challenge, verification, judgment. One review, a handful of defensible comments.">
-<meta property="og:url" content="https://mergejury.dev/">
-<meta property="og:image" content="https://mergejury.dev/og.png">
+<meta property="og:url" content="https://mergejury.etornam.dev/">
+<meta property="og:image" content="https://mergejury.etornam.dev/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="mergejury wordmark beside a tapering funnel. Twenty maybes, struck through: three defensible comments.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="mergejury · AI code review that posts only what survives">
 <meta name="twitter:description" content="Several AI reviewers, one lens each. Every finding fights for its life. One review, a handful of defensible comments.">
-<meta name="twitter:image" content="https://mergejury.dev/og.png">
+<meta name="twitter:image" content="https://mergejury.etornam.dev/og.png">
 <meta name="twitter:image:alt" content="mergejury wordmark beside a tapering funnel. Twenty maybes, struck through: three defensible comments.">
 
 <script type="application/ld+json">
@@ -33,8 +34,8 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "mergejury",
-  "url": "https://mergejury.dev/",
-  "image": "https://mergejury.dev/og.png",
+  "url": "https://mergejury.etornam.dev/",
+  "image": "https://mergejury.etornam.dev/og.png",
   "description": "A multi-reviewer code review harness: it fans a pull request out to several AI reviewers with different lenses, filters their findings through validation, an adversarial challenge, mechanical verification, and a judge, then posts one GitHub review with only the comments that survive.",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "macOS, Linux, Windows",
@@ -606,6 +607,7 @@ footer .links a:hover { color: var(--ink); }
   <section class="operate wrap">
     <h2 class="statement">Built to be operated,<br>not believed.</h2>
     <div class="cmds">
+      <div class="cmd"><code><span class="p">$</span> curl -fsSL mergejury.etornam.dev/install | sh</code><span class="what">one static binary, operator console included</span></div>
       <div class="cmd"><code><span class="p">$</span> mergejury review --local</code><span class="what">review the working tree before you push. No PR, no posting</span></div>
       <div class="cmd"><code><span class="p">$</span> mergejury adapters check</code><span class="what">which reviewer is broken, and the exact fix</span></div>
       <div class="cmd"><code><span class="p">$</span> mergejury runs replay 7</code><span class="what">re-judge a stored run for cents; tune prompts against real findings</span></div>

@@ -1,0 +1,5 @@
+# Cloudflare Pages / Netlify header rules. Harmless on hosts that ignore it.
+# The installer is a shell script, not a download.
+/install
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=300
