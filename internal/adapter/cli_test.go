@@ -2,6 +2,8 @@ package adapter
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -217,6 +219,7 @@ func TestCrashedNonzeroExit(t *testing.T) {
 // successful", then `-p` exits "Authentication required ... set
 // CURSOR_API_KEY". The probe must fail rather than green-light it.
 func TestProbeFailsOnMissingRequiredEnv(t *testing.T) {
+	installCursorProbeFixture(t)
 	t.Setenv("CURSOR_API_KEY", "")
 	fr := &fakeRunner{help: helpAll, results: []ExecResult{{Stdout: "Login successful"}}}
 	pr := testAdapter(t, "cursor", fr).Probe(context.Background())
@@ -232,6 +235,7 @@ func TestProbeFailsOnMissingRequiredEnv(t *testing.T) {
 }
 
 func TestProbePassesWithRequiredEnvSet(t *testing.T) {
+	installCursorProbeFixture(t)
 	t.Setenv("CURSOR_API_KEY", "test-key")
 	fr := &fakeRunner{help: helpAll, results: []ExecResult{{Stdout: "Login successful"}}}
 	pr := testAdapter(t, "cursor", fr).Probe(context.Background())
@@ -253,5 +257,24 @@ func TestCursorRuntimeAuthErrorClassified(t *testing.T) {
 	}
 	if res.Status.Retryable() {
 		t.Error("auth_error must not be retryable")
+	}
+}
+
+// Probe checks installation before using the fake subprocess runner.
+func installCursorProbeFixture(t *testing.T) {
+	t.Helper()
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "cursor-agent"), []byte("#!/bin/sh\nexit 0\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir)
+}
+
+func TestProbeFailsWhenBinaryMissing(t *testing.T) {
+	t.Setenv("PATH", t.TempDir())
+	fr := &fakeRunner{help: helpAll}
+	pr := testAdapter(t, "cursor", fr).Probe(context.Background())
+	if pr.OK || !strings.Contains(pr.Detail, "not found on PATH") {
+		t.Fatalf("missing executable not reported: %+v", pr)
 	}
 }
