@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { api, fmtCost, fmtDuration, sevGlyph, shortSha, type RunDetail } from '../api'
 
 const route = useRoute()
+const router = useRouter()
 const detail = ref<RunDetail | null>(null)
 const error = ref('')
 const replaying = ref(false)
@@ -13,13 +14,15 @@ const replaying = ref(false)
 const selCluster = ref<number | null>(null)
 
 async function load() {
+  error.value = ''
+  selCluster.value = null
   try {
     detail.value = await api.run(route.params.id as string)
   } catch (e) {
     error.value = String(e)
   }
 }
-onMounted(load)
+watch(() => route.params.id, load, { immediate: true })
 
 const findingsByAdapterRun = computed(() => {
   const m = new Map<number, typeof d.findings>()
@@ -67,12 +70,15 @@ const posted = computed(() =>
 async function replay() {
   if (!detail.value) return
   replaying.value = true
-  await api.replay(detail.value.run.id)
-  // Adjudication rebuilds server-side; poll once after a beat.
-  setTimeout(async () => {
-    await load()
+  error.value = ''
+  try {
+    const result = await api.replay(detail.value.run.id)
+    await router.push(`/runs/${result.run_id}`)
+  } catch (e) {
+    error.value = String(e)
+  } finally {
     replaying.value = false
-  }, 3000)
+  }
 }
 
 function dropLabel(f: { kept: boolean; drop_reason: string }): string {
@@ -88,7 +94,7 @@ function clusterAnchor(c: { path: string; line: number }): string {
 
 <template>
   <p v-if="error" class="err">{{ error }}</p>
-  <template v-else-if="detail">
+  <template v-if="detail">
     <h1>
       Run {{ detail.run.id }}
       <span class="dim" v-if="detail.run.repo"> · {{ detail.run.repo }}#{{ detail.run.pr_number }}</span>

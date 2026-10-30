@@ -77,7 +77,7 @@ mergejury review 123 --dry-run        # render the review for PR 123 without pos
 mergejury review https://github.com/o/r/pull/123
 mergejury runs list                   # stored runs
 mergejury runs show 7 --raw           # everything, incl. dropped findings and raw output
-mergejury runs replay 7               # re-run cluster/challenge/judge on stored findings, no adapters
+mergejury runs replay 7               # save a separate replay run from stored findings; no adapters or posting
 mergejury stats                       # cost per published comment per adapter, the survival metric
 mergejury serve                       # web console on 127.0.0.1:7777
 ```

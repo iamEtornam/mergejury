@@ -5,6 +5,7 @@ package httpapi
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -207,12 +208,16 @@ func (s *Server) replay(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, err)
 		return
 	}
-	go func() {
-		if _, err := s.orch.Replay(context.Background(), id, run.Options{Trigger: "replay"}); err != nil {
-			s.orch.Events.Publish(run.Event{RunID: id, Type: "run_error", Payload: err.Error(), At: time.Now().UTC()})
+	sum, err := s.orch.Replay(r.Context(), id, run.Options{Trigger: "replay"})
+	if err != nil {
+		status := http.StatusInternalServerError
+		if errors.Is(err, sql.ErrNoRows) {
+			status = http.StatusNotFound
 		}
-	}()
-	writeJSON(w, http.StatusAccepted, map[string]string{"status": "replaying"})
+		writeErr(w, status, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, sum)
 }
 
 // ---- SSE ----

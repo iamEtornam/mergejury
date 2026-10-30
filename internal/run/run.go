@@ -6,6 +6,7 @@ package run
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -40,7 +41,7 @@ type Orchestrator struct {
 	Cfg     config.Config
 	Store   *store.Store
 	Prompts *prompts.Set
-	Forge   forge.Forge       // nil for local-only use
+	Forge   forge.Forge // nil for local-only use
 	Client  *adapter.AnthropicClient
 	Runner  adapter.Runner
 	Events  *Broker // may be nil
@@ -261,7 +262,7 @@ type adapterOutcome struct {
 	arID   int64
 }
 
-func (o *Orchestrator) execute(ctx context.Context, p *packet.Packet, opts Options, local bool) (*Summary, error) {
+func (o *Orchestrator) execute(ctx context.Context, p *packet.Packet, opts Options, local bool) (sum *Summary, err error) {
 	adapters, err := o.selectAdapters(opts)
 	if err != nil {
 		return nil, err
@@ -277,7 +278,16 @@ func (o *Orchestrator) execute(ctx context.Context, p *packet.Packet, opts Optio
 	if err != nil {
 		return nil, err
 	}
-	sum := &Summary{RunID: runID, AdapterStatus: map[string]string{}}
+	sum = &Summary{RunID: runID, AdapterStatus: map[string]string{}}
+	var totalCost float64
+	defer func() {
+		if err != nil {
+			sum.Status = "failed"
+			sum.TotalCostUSD = totalCost
+			err = errors.Join(err, o.Store.FinishRun(runID, "failed", "", err.Error(), totalCost))
+			o.emit(runID, "run_error", err.Error())
+		}
+	}()
 	o.emit(runID, "run_started", map[string]any{"repo": p.Repo, "pr": p.PRNumber, "head_sha": p.HeadSHA})
 
 	// Gates: five agentic reviewers on a two-thousand-line PR is real money.
@@ -287,7 +297,7 @@ func (o *Orchestrator) execute(ctx context.Context, p *packet.Packet, opts Optio
 			p.ChangedLines, p.ChangedFiles, g.MaxChangedLines, g.MaxChangedFiles)
 		sum.Status = "gated"
 		sum.EventReason = reason
-		if !opts.DryRun && o.Forge != nil {
+		if !opts.DryRun && !o.Cfg.Posting.DryRun && o.Forge != nil {
 			body := "**mergejury: skipped.** " + reason
 			if _, err := o.Forge.CreateReview(ctx, p.Repo, p.PRNumber, forge.ReviewRequest{
 				CommitID: p.HeadSHA, Body: body, Event: forge.EventComment,
@@ -308,7 +318,7 @@ func (o *Orchestrator) execute(ctx context.Context, p *packet.Packet, opts Optio
 	if !local && p.RepoDir != "" {
 		wts, err = packet.NewWorktrees(ctx, p.RepoDir)
 		if err != nil {
-			return nil, err
+			return sum, err
 		}
 		defer wts.Cleanup()
 	}
@@ -324,7 +334,6 @@ func (o *Orchestrator) execute(ctx context.Context, p *packet.Packet, opts Optio
 	}
 	g.Wait()
 
-	var totalCost float64
 	allOK := true
 	var allFindings []finding.Finding
 	findingIdx := map[int]int64{} // index in allFindings -> adapter_run id
@@ -352,7 +361,7 @@ func (o *Orchestrator) execute(ctx context.Context, p *packet.Packet, opts Optio
 	}
 	vOutcomes := validate.Run(ctx, p, counter, allFindings)
 	var items []cluster.Item
-	var bodyNotes []string
+	var unanchored []forge.PublishedItem
 	for i, vo := range vOutcomes {
 		fid, err := o.Store.InsertFinding(findingIdx[i], vo.Finding, vo.Kept, vo.DropReason)
 		if err != nil {
@@ -363,8 +372,7 @@ func (o *Orchestrator) execute(ctx context.Context, p *packet.Packet, opts Optio
 		}
 		sum.Kept++
 		if vo.Demoted {
-			bodyNotes = append(bodyNotes, fmt.Sprintf("(unanchorable, from %s) **[%s]** `%s:%d` %s",
-				vo.Finding.ReviewerID, vo.Finding.Severity, vo.Finding.Path, vo.Finding.Line, vo.Finding.Title))
+			unanchored = append(unanchored, unresolvedFinding(vo.Finding))
 			continue
 		}
 		items = append(items, cluster.Item{FindingID: fid, Finding: vo.Finding})
@@ -372,10 +380,11 @@ func (o *Orchestrator) execute(ctx context.Context, p *packet.Packet, opts Optio
 	o.emit(runID, "validated", map[string]any{"produced": sum.Produced, "kept": sum.Kept})
 
 	published, needsHuman, nClusters, adjCost, err := o.adjudicate(ctx, runID, p, items, opts, wts)
+	totalCost += adjCost
 	if err != nil {
 		return sum, err
 	}
-	totalCost += adjCost
+	needsHuman = append(needsHuman, unanchored...)
 	sum.Clusters = nClusters
 	sum.Published = len(published)
 	sum.NeedsHuman = len(needsHuman)
@@ -417,7 +426,7 @@ func (o *Orchestrator) execute(ctx context.Context, p *packet.Packet, opts Optio
 	reviewIn := forge.ReviewInput{
 		Repo: p.Repo, PRNumber: p.PRNumber, HeadSHA: p.HeadSHA,
 		Event: event, EventReason: reason,
-		Published: published, NeedsHuman: needsHuman, BodyNotes: bodyNotes,
+		Published: published, NeedsHuman: needsHuman,
 		Adapters:          statusLines,
 		MaxInline:         maxInline,
 		MinSeverity:       o.Cfg.Posting.MinSeverity,
@@ -497,9 +506,9 @@ func (o *Orchestrator) runAdapter(ctx context.Context, runID int64, acfg config.
 
 	arID, serr := o.Store.InsertAdapterRun(store.AdapterRun{
 		RunID: runID, AdapterID: acfg.ID, Lens: acfg.Lens, Model: acfg.Model,
-		Status:     string(oc.result.Status),
-		DurationMS: oc.result.Duration.Milliseconds(),
-		CostUSD:    oc.result.CostUSD,
+		Status:      string(oc.result.Status),
+		DurationMS:  oc.result.Duration.Milliseconds(),
+		CostUSD:     oc.result.CostUSD,
 		InputTokens: oc.result.Tokens.Input, OutputTokens: oc.result.Tokens.Output,
 		RawOutput: oc.result.Raw, Error: oc.result.Err,
 	})
@@ -584,9 +593,7 @@ func (o *Orchestrator) adjudicate(ctx context.Context, runID int64, p *packet.Pa
 		})
 		cost += jCost
 		if jerr != nil {
-			// A judge that cannot run is a dropped cluster with the reason
-			// recorded, not a crashed run.
-			jout = adjudicate.JudgeOutput{Verdict: adjudicate.VerdictDrop, Reason: "judge failed: " + jerr.Error()}
+			return nil, nil, nClusters, cost, fmt.Errorf("judge cluster %d: %w", cid, jerr)
 		}
 
 		// The judge's anchor is re-validated: it has no authority to anchor
@@ -634,6 +641,13 @@ func (o *Orchestrator) adjudicate(ctx context.Context, runID int64, p *packet.Pa
 		}
 	}
 	return published, needsHuman, nClusters, cost, nil
+}
+
+func unresolvedFinding(f finding.Finding) forge.PublishedItem {
+	return forge.PublishedItem{
+		Path: f.Path, Line: f.Line, Severity: f.Severity,
+		Title: f.Title, Body: f.Body, Supporters: []string{f.ReviewerID},
+	}
 }
 
 func renderDryRun(in forge.ReviewInput, inline, overflow []forge.PublishedItem) string {
