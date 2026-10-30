@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/iamEtornam/mergejury/internal/adapter"
 	"github.com/iamEtornam/mergejury/internal/cluster"
 	"github.com/iamEtornam/mergejury/internal/finding"
 )
@@ -154,30 +155,21 @@ func checkAnchorContent(workDir string, c *cluster.Cluster) Result {
 }
 
 // runCommand executes a configured verification command in the worktree.
-// {{.Paths}} expands to the cluster's file.
+// {{.Paths}} expands to one quoted positional argument, never shell source.
 func runCommand(ctx context.Context, workDir, kind, command string, c *cluster.Cluster) Result {
-	cmdStr := strings.ReplaceAll(command, "{{.Paths}}", c.Path)
-	r := Result{Kind: kind, Command: cmdStr}
-	cmd := exec.CommandContext(ctx, "sh", "-c", cmdStr)
-	cmd.Dir = workDir
-	out, err := cmd.CombinedOutput()
-	if len(out) > 16<<10 {
-		out = out[:16<<10]
+	cmdStr := strings.ReplaceAll(command, "{{.Paths}}", `"$1"`)
+	er := adapter.ExecRunner(ctx, workDir, nil, "sh", "-c", cmdStr, "mergejury-verify", c.Path)
+	output := er.Stdout + er.Stderr
+	if len(output) > 16<<10 {
+		output = output[:16<<10]
 	}
-	r.Output = string(out)
-	if err != nil {
-		if ee, ok := err.(*exec.ExitError); ok {
-			r.ExitCode = ee.ExitCode()
-			// Nonzero exit from a linter/typechecker means it found
-			// something; whether that supports the finding is the judge's
-			// call. Report as-is.
-			r.Conclusion = ConcludeInconclusive
-			return r
-		}
-		r.Output += "\n(command failed to run: " + err.Error() + ")"
-		r.Conclusion = ConcludeInconclusive // an erroring check is not a pass
-		return r
+	r := Result{Kind: kind, Command: cmdStr, ExitCode: er.ExitCode, Output: output, Conclusion: ConcludeInconclusive}
+	if er.TimedOut {
+		r.ExitCode = -1
+		r.Output += "\n(command timed out: " + ctx.Err().Error() + ")"
+	} else if er.Err != nil {
+		r.ExitCode = -1
+		r.Output += "\n(command failed to run: " + er.Err.Error() + ")"
 	}
-	r.Conclusion = ConcludeInconclusive
 	return r
 }

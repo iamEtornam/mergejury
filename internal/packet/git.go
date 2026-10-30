@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 // Git shells out to the git binary. We deliberately do not embed a git
@@ -35,6 +36,7 @@ func LocalDiff(ctx context.Context, repoDir, baseRef string) (string, error) {
 type Worktrees struct {
 	RepoDir string
 	BaseDir string
+	mu      sync.Mutex
 	paths   map[string]string
 }
 
@@ -54,14 +56,18 @@ func (w *Worktrees) Add(ctx context.Context, adapterID, sha string) (string, err
 	if _, err := Git(ctx, w.RepoDir, "worktree", "add", "--detach", dest, sha); err != nil {
 		return "", err
 	}
+	w.mu.Lock()
 	w.paths[adapterID] = dest
+	w.mu.Unlock()
 	return dest, nil
 }
 
 // AssertClean fails loudly if an adapter dirtied its worktree: that is a bug
 // in the adapter's permission config, not something to clean up silently.
 func (w *Worktrees) AssertClean(ctx context.Context, adapterID string) error {
+	w.mu.Lock()
 	dir, ok := w.paths[adapterID]
+	w.mu.Unlock()
 	if !ok {
 		return nil
 	}
@@ -77,6 +83,8 @@ func (w *Worktrees) AssertClean(ctx context.Context, adapterID string) error {
 
 // Cleanup removes all worktrees. Call it deferred so it runs even on panic.
 func (w *Worktrees) Cleanup() {
+	w.mu.Lock()
+	defer w.mu.Unlock()
 	ctx := context.Background()
 	for _, dir := range w.paths {
 		_, _ = Git(ctx, w.RepoDir, "worktree", "remove", "--force", dir)

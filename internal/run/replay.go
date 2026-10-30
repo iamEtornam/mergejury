@@ -2,6 +2,7 @@ package run
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -9,18 +10,23 @@ import (
 	"github.com/iamEtornam/mergejury/internal/finding"
 	"github.com/iamEtornam/mergejury/internal/forge"
 	"github.com/iamEtornam/mergejury/internal/packet"
+	"github.com/iamEtornam/mergejury/internal/store"
 	"github.com/iamEtornam/mergejury/internal/validate"
 )
 
 // Replay re-runs clustering, challenging, and judging against findings
 // already in the store. No adapter invocations: judge prompt iteration for
-// cents against a fixed corpus of real findings. Never posts.
-func (o *Orchestrator) Replay(ctx context.Context, runID int64, opts Options) (*Summary, error) {
+// cents against a fixed corpus of real findings. Results are saved as a new
+// run; the source run and its posting/outcome history are never changed.
+func (o *Orchestrator) Replay(ctx context.Context, runID int64, opts Options) (sum *Summary, err error) {
 	r, err := o.Store.GetRun(runID)
 	if err != nil {
 		return nil, fmt.Errorf("run %d: %w", runID, err)
 	}
-	stored, err := o.Store.FindingsForRun(runID, true)
+	if r.Status == "running" {
+		return nil, fmt.Errorf("run %d is still running", runID)
+	}
+	stored, err := o.Store.FindingsForRun(runID, false)
 	if err != nil {
 		return nil, err
 	}
@@ -56,36 +62,73 @@ func (o *Orchestrator) Replay(ctx context.Context, runID int64, opts Options) (*
 		}
 	}
 
-	if err := o.Store.DeleteAdjudication(runID); err != nil {
+	replayID, err := o.Store.CreateRun(r.Repo, r.PRNumber, r.HeadSHA, r.BaseSHA, "replay", o.Cfg.Snapshot())
+	if err != nil {
 		return nil, err
 	}
-	sum := &Summary{RunID: runID, AdapterStatus: map[string]string{}, Status: "replayed"}
-	o.emit(runID, "replay_started", map[string]any{"findings": len(stored)})
-
-	var items []cluster.Item
-	for _, sf := range stored {
-		if sf.DropReason == validate.ReasonUnanchored {
-			continue // demoted body notes are not clustered
+	sum = &Summary{RunID: replayID, AdapterStatus: map[string]string{}}
+	defer func() {
+		if err != nil {
+			sum.Status = "failed"
+			err = errors.Join(err, o.Store.FinishRun(replayID, "failed", "", fmt.Sprintf("replay of run %d: %v", runID, err), sum.TotalCostUSD))
+			o.emit(replayID, "run_error", err.Error())
 		}
-		items = append(items, cluster.Item{FindingID: sf.ID, Finding: sf.Finding})
-	}
-	sum.Kept = len(items)
+	}()
+	o.emit(replayID, "replay_started", map[string]any{"source_run_id": runID, "findings": len(stored)})
 
-	var wts *packet.Worktrees
-	if p.RepoDir != "" {
-		if wts, err = packet.NewWorktrees(ctx, p.RepoDir); err == nil {
-			defer wts.Cleanup()
-		}
-	}
-	published, needsHuman, nClusters, cost, err := o.adjudicate(ctx, runID, p, items, opts, wts)
+	// Copy the recorded inputs, without claiming another adapter execution.
+	adapters, err := o.Store.AdapterRunsForRun(runID)
 	if err != nil {
 		return sum, err
 	}
+	adapterIDs := map[int64]int64{}
+	for _, ar := range adapters {
+		id, insertErr := o.Store.InsertAdapterRun(store.AdapterRun{
+			RunID: replayID, AdapterID: ar.AdapterID, Lens: ar.Lens, Model: ar.Model,
+			Status: ar.Status, RawOutput: ar.RawOutput, Error: ar.Error,
+		})
+		if insertErr != nil {
+			return sum, insertErr
+		}
+		adapterIDs[ar.ID] = id
+		sum.AdapterStatus[ar.AdapterID] = ar.Status
+	}
+	var items []cluster.Item
+	var unanchored []forge.PublishedItem
+	for _, sf := range stored {
+		fid, insertErr := o.Store.InsertFinding(adapterIDs[sf.AdapterRunID], sf.Finding, sf.Kept, sf.DropReason)
+		if insertErr != nil {
+			return sum, insertErr
+		}
+		sum.Produced++
+		if !sf.Kept {
+			continue
+		}
+		sum.Kept++
+		if sf.DropReason == validate.ReasonUnanchored {
+			unanchored = append(unanchored, unresolvedFinding(sf.Finding))
+			continue
+		}
+		items = append(items, cluster.Item{FindingID: fid, Finding: sf.Finding})
+	}
+
+	var wts *packet.Worktrees
+	if p.RepoDir != "" {
+		wts, err = packet.NewWorktrees(ctx, p.RepoDir)
+		if err != nil {
+			return sum, err
+		}
+		defer wts.Cleanup()
+	}
+	published, needsHuman, nClusters, cost, err := o.adjudicate(ctx, replayID, p, items, opts, wts)
+	sum.TotalCostUSD = cost
+	if err != nil {
+		return sum, err
+	}
+	needsHuman = append(needsHuman, unanchored...)
 	sum.Clusters = nClusters
 	sum.Published = len(published)
 	sum.NeedsHuman = len(needsHuman)
-	sum.TotalCostUSD = cost
-
 	// Recompute what the event would have been, for comparison. Replay
 	// cannot know adapter completeness better than the original run did.
 	maxSev := finding.Severity("")
@@ -105,7 +148,15 @@ func (o *Orchestrator) Replay(ctx context.Context, runID int64, opts Options) (*
 		PublishedCount:       len(published),
 		NeedsHumanCount:      len(needsHuman),
 	})
-	sum.Event, sum.EventReason = event, reason
-	o.emit(runID, "replay_finished", sum)
+	sum.Event = event
+	sum.EventReason = fmt.Sprintf("replay of run %d: %s", runID, reason)
+	sum.Status = "completed"
+	if r.Status != "completed" {
+		sum.Status = "degraded"
+	}
+	if err = o.Store.FinishRun(replayID, sum.Status, event, sum.EventReason, sum.TotalCostUSD); err != nil {
+		return sum, err
+	}
+	o.emit(replayID, "replay_finished", sum)
 	return sum, nil
 }

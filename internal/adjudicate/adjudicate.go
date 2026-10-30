@@ -161,9 +161,8 @@ type JudgeInput struct {
 	Verifications []verify.Result
 }
 
-// RunJudge adjudicates one cluster. The default on any ambiguity is drop:
-// unparseable or invalid judge output becomes a drop with the parse problem
-// as the reason, never a publish.
+// RunJudge adjudicates one cluster. Unparseable or invalid output is an
+// error: an incomplete adjudication must never be mistaken for a clean review.
 func RunJudge(ctx context.Context, client *anthropic.Client, ps *prompts.Set, model string, in JudgeInput) (JudgeOutput, float64, error) {
 	system, err := ps.Get("judge")
 	if err != nil {
@@ -192,12 +191,12 @@ func RunJudge(ctx context.Context, client *anthropic.Client, ps *prompts.Set, mo
 	}
 	var out JudgeOutput
 	if err := json.Unmarshal([]byte(finding.ExtractJSON(resp.Text)), &out); err != nil {
-		return JudgeOutput{Verdict: VerdictDrop, Reason: "judge output unparseable: " + err.Error()}, resp.Cost, nil
+		return JudgeOutput{}, resp.Cost, fmt.Errorf("judge output unparseable: %w", err)
 	}
 	switch out.Verdict {
 	case VerdictPublish, VerdictNeedsHuman:
 		if out.Final == nil || out.Final.Body == "" {
-			return JudgeOutput{Verdict: VerdictDrop, Reason: "judge published without a final comment body"}, resp.Cost, nil
+			return JudgeOutput{}, resp.Cost, fmt.Errorf("judge emitted %s without a final comment body", out.Verdict)
 		}
 		if out.Final.Severity.Rank() == 0 {
 			out.Final.Severity = in.Cluster.MaxSeverity()
@@ -210,7 +209,7 @@ func RunJudge(ctx context.Context, client *anthropic.Client, ps *prompts.Set, mo
 		}
 	case VerdictDrop:
 	default:
-		return JudgeOutput{Verdict: VerdictDrop, Reason: fmt.Sprintf("judge emitted unknown verdict %q", out.Verdict)}, resp.Cost, nil
+		return JudgeOutput{}, resp.Cost, fmt.Errorf("judge emitted unknown verdict %q", out.Verdict)
 	}
 	return out, resp.Cost, nil
 }

@@ -30,7 +30,7 @@ gates:                         # a PR failing a gate gets a short explanatory re
     - "**/*.pb.go"
     - "**/vendor/**"
 
-verification:                  # run in the worktree; {{.Paths}} expands to the cluster's file
+verification:                  # run in the worktree; use bare {{.Paths}} for one safely quoted file argument
   commands:
     lint: "golangci-lint run --out-format json {{.Paths}}"
     typecheck: "go build ./..."

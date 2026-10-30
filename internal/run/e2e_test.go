@@ -24,10 +24,10 @@ import (
 // ---- fake forge ----
 
 type fakeForge struct {
-	pr          *forge.PR
-	created     []forge.ReviewRequest
-	dismissed   []int64
-	nextID      int64
+	pr        *forge.PR
+	created   []forge.ReviewRequest
+	dismissed []int64
+	nextID    int64
 }
 
 func (f *fakeForge) FetchPR(context.Context, string, int) (*forge.PR, error) { return f.pr, nil }
@@ -38,7 +38,9 @@ func (f *fakeForge) CreateReview(_ context.Context, _ string, _ int, req forge.R
 	return f.nextID, nil
 }
 func (f *fakeForge) UpdateReviewBody(context.Context, string, int, int64, string) error { return nil }
-func (f *fakeForge) ListReviews(context.Context, string, int) ([]forge.Review, error)   { return nil, nil }
+func (f *fakeForge) ListReviews(context.Context, string, int) ([]forge.Review, error) {
+	return nil, nil
+}
 func (f *fakeForge) DismissReview(_ context.Context, _ string, _ int, id int64, _ string) error {
 	f.dismissed = append(f.dismissed, id)
 	return nil
@@ -55,6 +57,7 @@ func (f *fakeForge) ListReviewComments(context.Context, string, int) ([]forge.Re
 type modelStub struct {
 	reviewerText  string
 	judgeText     string
+	judgeStatus   int
 	challengeText string
 	userPrompts   []string
 }
@@ -74,6 +77,10 @@ func (m *modelStub) handler() http.HandlerFunc {
 		text := m.reviewerText
 		switch {
 		case strings.Contains(req.System, "You are the judge"):
+			if m.judgeStatus != 0 {
+				http.Error(w, `{"error":{"message":"judge unavailable"}}`, m.judgeStatus)
+				return
+			}
 			text = m.judgeText
 		case strings.Contains(req.System, "argue that this finding is a false positive"):
 			text = m.challengeText

@@ -144,7 +144,11 @@ async function get<T>(url: string): Promise<T> {
 export const api = {
   runs: (): Promise<Run[]> => get('/api/runs'),
   run: (id: number | string): Promise<RunDetail> => get(`/api/runs/${id}`),
-  replay: (id: number) => fetch(`/api/runs/${id}/replay`, { method: 'POST' }),
+  replay: async (id: number): Promise<{ run_id: number }> => {
+    const res = await fetch(`/api/runs/${id}/replay`, { method: 'POST' })
+    if (!res.ok) throw new Error(`Replay failed: ${res.status} ${await res.text()}`)
+    return res.json()
+  },
   probe: (): Promise<ProbeResult[]> => get('/api/adapters/probe'),
   stats: (): Promise<AdapterStats[]> => get('/api/stats'),
   prompts: (): Promise<string[]> => get('/api/prompts'),

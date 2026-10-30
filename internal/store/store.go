@@ -88,21 +88,21 @@ func now() string { return time.Now().UTC().Format(time.RFC3339) }
 // ---- runs ----
 
 type Run struct {
-	ID                int64      `json:"id"`
-	Repo              string     `json:"repo"`
-	PRNumber          int        `json:"pr_number"`
-	HeadSHA           string     `json:"head_sha"`
-	BaseSHA           string     `json:"base_sha"`
-	Trigger           string     `json:"trigger"`
-	Status            string     `json:"status"`
-	ReviewEvent       string     `json:"review_event"`
-	ReviewEventReason string     `json:"review_event_reason"`
-	StartedAt         string     `json:"started_at"`
-	FinishedAt        *string    `json:"finished_at"`
-	TotalCostUSD      float64    `json:"total_cost_usd"`
-	ConfigSnapshot    string     `json:"config_snapshot"`
-	FindingsProduced  int        `json:"findings_produced"`
-	CommentsPosted    int        `json:"comments_posted"`
+	ID                int64   `json:"id"`
+	Repo              string  `json:"repo"`
+	PRNumber          int     `json:"pr_number"`
+	HeadSHA           string  `json:"head_sha"`
+	BaseSHA           string  `json:"base_sha"`
+	Trigger           string  `json:"trigger"`
+	Status            string  `json:"status"`
+	ReviewEvent       string  `json:"review_event"`
+	ReviewEventReason string  `json:"review_event_reason"`
+	StartedAt         string  `json:"started_at"`
+	FinishedAt        *string `json:"finished_at"`
+	TotalCostUSD      float64 `json:"total_cost_usd"`
+	ConfigSnapshot    string  `json:"config_snapshot"`
+	FindingsProduced  int     `json:"findings_produced"`
+	CommentsPosted    int     `json:"comments_posted"`
 }
 
 func (s *Store) CreateRun(repo string, pr int, headSHA, baseSHA, trigger, configSnapshot string) (int64, error) {
@@ -324,25 +324,6 @@ func (s *Store) ClustersForRun(runID int64) ([]StoredCluster, error) {
 	return out, nil
 }
 
-// DeleteAdjudication clears clusters/challenges/verifications/verdicts for a
-// run so replay can rebuild them from stored findings.
-func (s *Store) DeleteAdjudication(runID int64) error {
-	stmts := []string{
-		`DELETE FROM outcomes WHERE verdict_id IN (SELECT v.id FROM verdicts v JOIN clusters c ON v.cluster_id=c.id WHERE c.run_id=?)`,
-		`DELETE FROM verdicts WHERE cluster_id IN (SELECT id FROM clusters WHERE run_id=?)`,
-		`DELETE FROM challenges WHERE cluster_id IN (SELECT id FROM clusters WHERE run_id=?)`,
-		`DELETE FROM verifications WHERE cluster_id IN (SELECT id FROM clusters WHERE run_id=?)`,
-		`DELETE FROM cluster_findings WHERE cluster_id IN (SELECT id FROM clusters WHERE run_id=?)`,
-		`DELETE FROM clusters WHERE run_id=?`,
-	}
-	for _, q := range stmts {
-		if _, err := s.db.Exec(q, runID); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 type StoredVerification struct {
 	ID         int64  `json:"id"`
 	ClusterID  int64  `json:"cluster_id"`
@@ -538,6 +519,8 @@ func (s *Store) Stats() ([]AdapterStats, error) {
 		            WHERE f.adapter_run_id = ar.id AND o.dismissed = 1)), 0),
 		       COALESCE(SUM(ar.cost_usd), 0)
 		FROM adapter_runs ar
+		JOIN runs r ON r.id = ar.run_id
+		WHERE r.trigger != 'replay'
 		GROUP BY ar.adapter_id, ar.lens
 		ORDER BY ar.adapter_id`)
 	if err != nil {
@@ -565,7 +548,7 @@ func (s *Store) Stats() ([]AdapterStats, error) {
 }
 
 func (s *Store) medianLatency(adapterID string) int64 {
-	rows, err := s.db.Query(`SELECT duration_ms FROM adapter_runs WHERE adapter_id = ? ORDER BY duration_ms`, adapterID)
+	rows, err := s.db.Query(`SELECT ar.duration_ms FROM adapter_runs ar JOIN runs r ON r.id = ar.run_id WHERE ar.adapter_id = ? AND r.trigger != 'replay' ORDER BY ar.duration_ms`, adapterID)
 	if err != nil {
 		return 0
 	}
